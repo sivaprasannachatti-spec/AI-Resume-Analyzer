@@ -55,6 +55,17 @@ def keyword_in_text(keyword: str, text: str) -> bool:
         raise CustomException(e, sys)
 
 
+def _normalize_to_dict(obj: Any) -> Any:
+    """Recursively converts Pydantic models and nested structures to plain Python dictionaries."""
+    if hasattr(obj, "model_dump"):
+        return _normalize_to_dict(obj.model_dump())
+    if isinstance(obj, dict):
+        return {k: _normalize_to_dict(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_normalize_to_dict(item) for item in obj]
+    return obj
+
+
 def _extract_all_text(data: Any) -> str:
     """Flattens all strings from nested resume dictionaries/lists into a single text block."""
     parts: List[str] = []
@@ -62,6 +73,8 @@ def _extract_all_text(data: Any) -> str:
     def _walk(obj: Any) -> None:
         if isinstance(obj, str):
             parts.append(obj)
+        elif hasattr(obj, "model_dump"):
+            _walk(obj.model_dump())
         elif isinstance(obj, list):
             for item in obj:
                 _walk(item)
@@ -82,7 +95,10 @@ def _title_tokens(text: str) -> set[str]:
     }
 
 
-def compute_title_match(resume: Dict[str, Any], jd: Dict[str, Any]) -> Optional[float]:
+def compute_title_match(
+    resume: Union[Dict[str, Any], ResumeSchema],
+    jd: Union[Dict[str, Any], JDSchema],
+) -> Optional[float]:
     """
     Scores how literally the JD's role title appears in the resume:
     - 100: Exact title in headline
@@ -90,13 +106,16 @@ def compute_title_match(resume: Dict[str, Any], jd: Dict[str, Any]) -> Optional[
     - Up to 50: Partial word overlap with headline
     """
     try:
-        role = jd.get("role")
+        resume_dict = _normalize_to_dict(resume)
+        jd_dict = _normalize_to_dict(jd)
+
+        role = jd_dict.get("role")
         if not isinstance(role, str) or not role.strip():
             return None
 
-        personal_info = resume.get("personalInfo") or {}
+        personal_info = resume_dict.get("personalInfo") or {}
         headline = str(personal_info.get("title") or "")
-        summary = str(resume.get("summary") or "")
+        summary = str(resume_dict.get("summary") or "")
 
         if headline and keyword_in_text(role, headline):
             return _TITLE_IN_HEADLINE
@@ -114,16 +133,20 @@ def compute_title_match(resume: Dict[str, Any], jd: Dict[str, Any]) -> Optional[
 
 
 def compute_skills_coverage(
-    resume: Dict[str, Any], jd: Dict[str, Any]
+    resume: Union[Dict[str, Any], ResumeSchema],
+    jd: Union[Dict[str, Any], JDSchema],
 ) -> Tuple[float, List[str], List[str]]:
     """
     Checks overlap between required/preferred JD skills and the resume.
     Returns (score, matched_skills, missing_skills).
     """
     try:
+        resume_dict = _normalize_to_dict(resume)
+        jd_dict = _normalize_to_dict(jd)
+
         target_skills: List[str] = []
-        target_skills.extend(jd.get("required_skills") or [])
-        target_skills.extend(jd.get("preferred_skills") or [])
+        target_skills.extend(jd_dict.get("required_skills") or [])
+        target_skills.extend(jd_dict.get("preferred_skills") or [])
 
         # Remove duplicate skills case-insensitively while preserving order
         seen = set()
@@ -138,22 +161,27 @@ def compute_skills_coverage(
 
         # Gather resume skills
         resume_skills_set = {
-            s.strip().lower() for s in (resume.get("skills") or []) if isinstance(s, str)
+            s.strip().lower() for s in (resume_dict.get("skills") or []) if isinstance(s, str)
         }
 
         # Also collect skills mentioned in project technologies
-        for proj in resume.get("projects") or []:
-            for tech in proj.get("project_technologies") or []:
-                if isinstance(tech, str):
-                    resume_skills_set.add(tech.strip().lower())
+        for proj in resume_dict.get("projects") or []:
+            if isinstance(proj, dict):
+                for tech in proj.get("project_technologies") or []:
+                    if isinstance(tech, str):
+                        resume_skills_set.add(tech.strip().lower())
 
-        # Also collect certification names (e.g., AWS Certified, CKA, Terraform)
-        for cert in resume.get("certifications") or []:
-            c_name = cert.get("certification_name")
-            if isinstance(c_name, str) and c_name.strip():
-                resume_skills_set.add(c_name.strip().lower())
+        # Also collect certification names and issuers
+        for cert in resume_dict.get("certifications") or []:
+            if isinstance(cert, dict):
+                c_name = cert.get("certification_name")
+                if isinstance(c_name, str) and c_name.strip():
+                    resume_skills_set.add(c_name.strip().lower())
+                issuer = cert.get("issuer")
+                if isinstance(issuer, str) and issuer.strip():
+                    resume_skills_set.add(issuer.strip().lower())
 
-        resume_full_text = _extract_all_text(resume)
+        resume_full_text = _extract_all_text(resume_dict)
 
         matched: List[str] = []
         missing: List[str] = []
@@ -172,17 +200,21 @@ def compute_skills_coverage(
 
 
 def compute_keyword_match(
-    resume: Dict[str, Any], jd: Dict[str, Any]
+    resume: Union[Dict[str, Any], ResumeSchema],
+    jd: Union[Dict[str, Any], JDSchema],
 ) -> Tuple[float, List[str], List[str]]:
     """
     Evaluates general keyword coverage from JD across all resume text.
     Returns (score, matched_keywords, missing_keywords).
     """
     try:
+        resume_dict = _normalize_to_dict(resume)
+        jd_dict = _normalize_to_dict(jd)
+
         all_keywords: List[str] = []
-        all_keywords.extend(jd.get("required_skills") or [])
-        all_keywords.extend(jd.get("preferred_skills") or [])
-        all_keywords.extend(jd.get("keywords") or [])
+        all_keywords.extend(jd_dict.get("required_skills") or [])
+        all_keywords.extend(jd_dict.get("preferred_skills") or [])
+        all_keywords.extend(jd_dict.get("keywords") or [])
 
         seen = set()
         deduped_keywords: List[str] = []
@@ -194,7 +226,7 @@ def compute_keyword_match(
         if not deduped_keywords:
             return 100.0, [], []
 
-        resume_text = _extract_all_text(resume)
+        resume_text = _extract_all_text(resume_dict)
         matched: List[str] = []
         missing: List[str] = []
 
@@ -210,23 +242,31 @@ def compute_keyword_match(
         raise CustomException(e, sys)
 
 
-def compute_section_completeness(resume: Dict[str, Any]) -> float:
+def compute_section_completeness(resume: Union[Dict[str, Any], ResumeSchema]) -> float:
     """
     Scores (0-100) whether contact info (email/phone) and essential sections exist:
     - Summary
-    - Work Experience
+    - Work Experience, Projects, or Academic Positions
     - Education
     - Skills
     """
     try:
-        personal_info = resume.get("personalInfo") or {}
+        resume_dict = _normalize_to_dict(resume)
+        personal_info = resume_dict.get("personalInfo") or {}
         has_contact = bool(personal_info.get("email") or personal_info.get("phone"))
 
+        # Practical experience can come from employment, projects, or academic positions
+        has_experience = bool(
+            resume_dict.get("workExperience")
+            or resume_dict.get("projects")
+            or resume_dict.get("academicPositions")
+        )
+
         sections = [
-            bool(resume.get("summary")),
-            bool(resume.get("workExperience")),
-            bool(resume.get("education")),
-            bool(resume.get("skills")),
+            bool(resume_dict.get("summary")),
+            has_experience,
+            bool(resume_dict.get("education")),
+            bool(resume_dict.get("skills")),
         ]
 
         # Total 5 criteria: 4 sections + contact info
@@ -237,7 +277,7 @@ def compute_section_completeness(resume: Dict[str, Any]) -> float:
 
 
 def _collect_date_strings(resume: Dict[str, Any]) -> List[str]:
-    """Collects start and end date strings from experience and education."""
+    """Collects start and end date strings from experience, education, and academic positions."""
     dates: List[str] = []
     for exp in resume.get("workExperience") or []:
         if isinstance(exp, dict):
@@ -253,16 +293,24 @@ def _collect_date_strings(resume: Dict[str, Any]) -> List[str]:
             if edu.get("end_date"):
                 dates.append(str(edu["end_date"]))
 
+    for pos in resume.get("academicPositions") or []:
+        if isinstance(pos, dict):
+            if pos.get("start_date"):
+                dates.append(str(pos["start_date"]))
+            if pos.get("end_date"):
+                dates.append(str(pos["end_date"]))
+
     return dates
 
 
-def compute_date_consistency(resume: Dict[str, Any]) -> Optional[float]:
+def compute_date_consistency(resume: Union[Dict[str, Any], ResumeSchema]) -> Optional[float]:
     """
     Calculates the share of dates written in the dominant format (0-100).
     Returns None if fewer than 2 dates are present.
     """
     try:
-        date_values = _collect_date_strings(resume)
+        resume_dict = _normalize_to_dict(resume)
+        date_values = _collect_date_strings(resume_dict)
         style_counts: Dict[str, int] = {}
 
         for value in date_values:
@@ -310,8 +358,8 @@ def _generate_recommendations(
 
     if section_score < 100:
         tips.append(
-            "Ensure all 5 standard resume sections are present: Contact Info, Professional Summary, "
-            "Work Experience, Education, and Technical Skills."
+            "Ensure all standard resume sections are present: Contact Info, Professional Summary, "
+            "Experience (Work Experience, Projects, or Academic Positions), Education, and Technical Skills."
         )
 
     if date_score is not None and date_score < 100:
@@ -340,15 +388,15 @@ def compute_ats_score(
 
     Args:
         resume: Either a ResumeSchema Pydantic object or a normalized dict.
-        jd: Either a JD Pydantic object or a dictionary with role, required_skills, etc.
+        jd: Either a JDSchema Pydantic object or a dictionary with role, required_skills, etc.
 
     Returns:
         Dict containing overall_score, sub_scores, key_skills, missing_skills, recommendations.
     """
     try:
-        # Convert Pydantic objects to dicts if needed
-        resume_dict = resume.model_dump() if hasattr(resume, "model_dump") else dict(resume)
-        jd_dict = jd.model_dump() if hasattr(jd, "model_dump") else dict(jd)
+        # Convert Pydantic objects or mixed structures to dicts recursively
+        resume_dict = _normalize_to_dict(resume)
+        jd_dict = _normalize_to_dict(jd)
 
         # 1. Compute sub-scores
         title_score = compute_title_match(resume_dict, jd_dict)
@@ -408,7 +456,7 @@ def evaluate_and_save_ats_analysis(
     """
     try:
         score_data = compute_ats_score(resume=resume, jd=jd)
-        jd_dict = jd.model_dump() if hasattr(jd, "model_dump") else dict(jd)
+        jd_dict = _normalize_to_dict(jd)
 
         # Format ATS issues dictionary for structured DB storage
         ats_issues_payload = [

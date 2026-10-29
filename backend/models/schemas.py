@@ -61,8 +61,8 @@ try:
         cv_id: str = Field(default_factory=_uuid, primary_key=True)
         resume_id: str = Field(..., foreign_key="resumes.resume_id", description="The ID of the resume associated with the CV")
         cv_payload: Dict = Field(default={}, sa_column=Column(JSON), description="The payload of the CV in JSON format")
-        file_name: str = Field(..., description="The name of the CV file")
-        file_url: str = Field(..., description="The URL of the CV file")
+        file_name: Optional[str] = Field(default=None, description="The name of the CV file")
+        file_url: Optional[str] = Field(default=None, description="The URL of the CV file")
         created_at: datetime = Field(default_factory=_now, description="The timestamp when the CV was created")
         updated_at: datetime = Field(default_factory=_now, description="The timestamp when the CV was last updated")
 
