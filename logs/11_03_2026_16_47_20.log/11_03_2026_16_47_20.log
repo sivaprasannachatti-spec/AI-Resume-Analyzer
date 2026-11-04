@@ -1,0 +1,26 @@
+[ 2026-11-03 16:47:20,337 ] 901 docling.datamodel.document - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+[ 2026-11-03 16:47:23,615 ] 890 docling.document_converter - INFO - Going to convert document batch...
+[ 2026-11-03 16:47:23,618 ] 937 docling.document_converter - INFO - Initializing pipeline for StandardPdfPipeline with options hash d7c5e8ff1be4a7b68024186bcf40384f
+[ 2026-11-03 16:47:23,674 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-03 16:47:23,690 ] 31 docling.models.factories - INFO - Registered picture descriptions: ['picture_description_vlm_engine', 'vlm', 'api']
+[ 2026-11-03 16:47:23,746 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-03 16:47:23,821 ] 21 docling.models.factories - INFO - Registered ocr engines: ['auto', 'easyocr', 'kserve_v2_ocr', 'nemotron-ocr', 'ocrmac', 'rapidocr', 'tesserocr', 'tesseract']
+[ 2026-11-03 16:47:23,823 ] 138 docling.models.stages.ocr.auto_ocr_model - INFO - rapidocr cannot be used because onnxruntime is not installed.
+[ 2026-11-03 16:47:23,826 ] 167 docling.models.stages.ocr.auto_ocr_model - INFO - easyocr cannot be used because it is not installed.
+[ 2026-11-03 16:47:24,835 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-03 16:47:24,857 ] 190 docling.models.stages.ocr.auto_ocr_model - INFO - Auto OCR model selected rapidocr with torch.
+[ 2026-11-03 16:47:24,887 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-03 16:47:24,900 ] 39 docling.models.factories - INFO - Registered layout engines: ['layout_object_detection', 'docling_layout_default', 'docling_experimental_table_crops_layout']
+[ 2026-11-03 16:47:29,950 ] 124 docling.models.inference_engines.object_detection.transformers_engine - INFO - Initializing Transformers object-detection engine
+[ 2026-11-03 16:47:29,950 ] 57 docling.models.inference_engines.common.hf_vision_base - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+[ 2026-11-03 16:47:29,951 ] 114 docling.models.utils.hf_model_download - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+[ 2026-11-03 16:47:30,003 ] 125 docling.models.utils.hf_model_download - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\shiva\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+[ 2026-11-03 16:47:30,003 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-03 16:47:35,247 ] 198 docling.models.inference_engines.object_detection.transformers_engine - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+[ 2026-11-03 16:47:35,288 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-03 16:47:35,303 ] 49 docling.models.factories - INFO - Registered table structure engines: ['docling_tableformer', 'docling_tableformer_v2', 'granite_vision_table']
+[ 2026-11-03 16:47:35,303 ] 114 docling.models.utils.hf_model_download - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+[ 2026-11-03 16:47:35,339 ] 125 docling.models.utils.hf_model_download - INFO - Model docling-project/docling-models already cached at C:\Users\shiva\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+[ 2026-11-03 16:47:35,415 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-03 16:47:36,150 ] 91 docling.pipeline.base_pipeline - INFO - Processing document Updated_Resume_v2.pdf
+[ 2026-11-03 16:47:40,310 ] 916 docling.document_converter - INFO - Finished converting document Updated_Resume_v2.pdf in 19.98 sec.

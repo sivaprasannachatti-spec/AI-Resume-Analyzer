@@ -1,0 +1,154 @@
+[ 2026-11-04 21:15:52,520 ] 67 backend.models.database - INFO - Database schema verified: resumes.master_resume_payload is available
+[ 2026-11-04 21:16:08,104 ] 70 backend.services.upload_file_service - INFO - Starting object storage upload (endpoint=s3.us-east-005.backblazeb2.com, bucket=AI-Resume-Analyser, content_type=application/pdf)
+[ 2026-11-04 21:17:30,592 ] 104 backend.services.upload_file_service - ERROR - Storage client/network failure during upload (endpoint=s3.us-east-005.backblazeb2.com, bucket=AI-Resume-Analyser, duration_seconds=82.49, error_type=ConnectionClosedError)
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 499, in _make_request
+    conn.request(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 96, in request
+    rval = super().request(method, url, body, headers, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connection.py", line 581, in request
+    self.send(chunk)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 223, in send
+    return super().send(str)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\http\client.py", line 1077, in send
+    self.sock.sendall(data)
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1210, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1179, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionAbortedError: [Errno 10053] An established connection was aborted by the software in your host machine
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\httpsession.py", line 509, in send
+    urllib_response = conn.urlopen(
+                      ^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 847, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\util\retry.py", line 485, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\util\util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 499, in _make_request
+    conn.request(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 96, in request
+    rval = super().request(method, url, body, headers, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connection.py", line 581, in request
+    self.send(chunk)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 223, in send
+    return super().send(str)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\http\client.py", line 1077, in send
+    self.sock.sendall(data)
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1210, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1179, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.ProtocolError: ('Connection aborted.', ConnectionAbortedError(10053, 'An established connection was aborted by the software in your host machine'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\backend\services\upload_file_service.py", line 78, in sync_file_upload
+    client.upload_fileobj(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\boto3\s3\inject.py", line 678, in upload_fileobj
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\futures.py", line 111, in result
+    return self._coordinator.result()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\futures.py", line 287, in result
+    raise self._exception
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\tasks.py", line 142, in __call__
+    return self._execute_main(kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\tasks.py", line 165, in _execute_main
+    return_value = self._main(**kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\upload.py", line 796, in _main
+    client.put_object(Bucket=bucket, Key=key, Body=body, **extra_args)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 1076, in _make_api_call
+    http, parsed_response = self._make_request(
+                            ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 1100, in _make_request
+    return self._endpoint.make_request(operation_model, request_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 119, in make_request
+    return self._send_request(request_dict, operation_model)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 231, in _send_request
+    raise exception
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 281, in _do_get_response
+    http_response = self._send(request)
+                    ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 385, in _send
+    return self.http_session.send(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\httpsession.py", line 550, in send
+    raise ConnectionClosedError(
+botocore.exceptions.ConnectionClosedError: Connection was closed before we received a valid response from endpoint URL: "https://s3.us-east-005.backblazeb2.com/AI-Resume-Analyser/Updated_Resume_v2.pdf".
+[ 2026-11-04 21:17:30,957 ] 901 docling.datamodel.document - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+[ 2026-11-04 21:17:31,678 ] 890 docling.document_converter - INFO - Going to convert document batch...
+[ 2026-11-04 21:17:31,678 ] 937 docling.document_converter - INFO - Initializing pipeline for StandardPdfPipeline with options hash 5acb6069314e2a09e0afdc55db2aea52
+[ 2026-11-04 21:17:31,724 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 21:17:31,730 ] 31 docling.models.factories - INFO - Registered picture descriptions: ['picture_description_vlm_engine', 'vlm', 'api']
+[ 2026-11-04 21:17:31,759 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 21:17:31,803 ] 21 docling.models.factories - INFO - Registered ocr engines: ['auto', 'easyocr', 'kserve_v2_ocr', 'nemotron-ocr', 'ocrmac', 'rapidocr', 'tesserocr', 'tesseract']
+[ 2026-11-04 21:17:31,803 ] 138 docling.models.stages.ocr.auto_ocr_model - INFO - rapidocr cannot be used because onnxruntime is not installed.
+[ 2026-11-04 21:17:31,806 ] 167 docling.models.stages.ocr.auto_ocr_model - INFO - easyocr cannot be used because it is not installed.
+[ 2026-11-04 21:17:32,409 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-04 21:17:32,444 ] 190 docling.models.stages.ocr.auto_ocr_model - INFO - Auto OCR model selected rapidocr with torch.
+[ 2026-11-04 21:17:32,469 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 21:17:32,485 ] 39 docling.models.factories - INFO - Registered layout engines: ['layout_object_detection', 'docling_layout_default', 'docling_experimental_table_crops_layout']
+[ 2026-11-04 21:17:37,523 ] 124 docling.models.inference_engines.object_detection.transformers_engine - INFO - Initializing Transformers object-detection engine
+[ 2026-11-04 21:17:37,523 ] 57 docling.models.inference_engines.common.hf_vision_base - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+[ 2026-11-04 21:17:37,523 ] 114 docling.models.utils.hf_model_download - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+[ 2026-11-04 21:17:37,869 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-layout-heron/revision/main "HTTP/1.1 200 OK"
+[ 2026-11-04 21:17:37,896 ] 125 docling.models.utils.hf_model_download - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\shiva\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+[ 2026-11-04 21:17:37,906 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-04 21:17:40,850 ] 198 docling.models.inference_engines.object_detection.transformers_engine - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+[ 2026-11-04 21:17:40,888 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 21:17:40,904 ] 49 docling.models.factories - INFO - Registered table structure engines: ['docling_tableformer', 'docling_tableformer_v2', 'granite_vision_table']
+[ 2026-11-04 21:17:40,904 ] 114 docling.models.utils.hf_model_download - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+[ 2026-11-04 21:17:41,177 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-models/revision/v2.3.0 "HTTP/1.1 200 OK"
+[ 2026-11-04 21:17:41,196 ] 125 docling.models.utils.hf_model_download - INFO - Model docling-project/docling-models already cached at C:\Users\shiva\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+[ 2026-11-04 21:17:41,261 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-04 21:17:42,140 ] 91 docling.pipeline.base_pipeline - INFO - Processing document Updated_Resume_v2.pdf
+[ 2026-11-04 21:17:46,934 ] 916 docling.document_converter - INFO - Finished converting document Updated_Resume_v2.pdf in 15.97 sec.
+[ 2026-11-04 21:17:47,659 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 402 Payment Required"
+[ 2026-11-04 21:17:47,661 ] 202 backend.services.llm_services - WARNING - OpenRouter request failed with configured key 1 (APIStatusError); trying the next configured key
+[ 2026-11-04 21:17:48,070 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 402 Payment Required"
+[ 2026-11-04 21:17:48,070 ] 202 backend.services.llm_services - WARNING - OpenRouter request failed with configured key 2 (APIStatusError); trying the next configured key
+[ 2026-11-04 21:17:50,857 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+[ 2026-11-04 21:17:56,638 ] 214 backend.services.llm_services - INFO - OpenRouter produced resume JSON on attempt 1/3: {"personalInfo": {"name": "[REDACTED]", "title": "AI Engineer and Generative AI Developer", "email": "[REDACTED]", "phone": "[REDACTED]", "location": "[REDACTED]", "website": "[REDACTED]", "linkedin": "[REDACTED]", "github": "[REDACTED]"}, "summary": "AI Engineer and Generative AI Developer experienced in building LLM-powered applications, optimizing prompts, and designing RAG (Retrieval-Augmented Generation) pipelines over vector databases. Skilled in developing AI agents with LangChain... [truncated]", "workExperience": [{"id": 1, "title": "AI/ML Intern", "company": "AskFirst", "location": "[REDACTED]", "years": "Jun 2026 - Jul 2026", "responsibilities": ["Engineered embedding-based retrieval pipelines for a healthcare RAG system over a vector database, improving retrieval relevance for domain-specific queries.", "Optimized LLM prompt formatting by restructuring raw-string context into structured MD/XML/ YAML, improving prompt parsing and response consistency.", "Developed a domain-specific healthcare chatbot with a custom deterministic orchestrator for query routing, including an escalation flow to doctor-consultation booking."], "descriptionStyles": ["bullet", "bullet", "bullet"]}], "education": [{"id": 1, "institution": "Neil Gogte Institute of Technology", "degree": "B.E. in Computer Science Engineering", "location": "[REDACTED]", "years": "2023 - 2027", "description": "CGPA: 8.2"}, {"id": 2, "institution": "Sri Chaitanya Junior College", "degree": "TS Intermediate (Class XII)", "location": "[REDACTED]", "years": "2021 - 2023", "description": "Aggregate: 91%"}, {"id": 3, "institution": "Bhashyam High School", "degree": "TS SSC (Class X)", "location": "[REDACTED]", "years": "2019 - 2021", "description": "CGPA: 10"}], "projects": [{"id": 1, "project_name": "Voice AI Agent", "project_years": "", "project_description": ["Built a full-stack, voice-based AI application using FastAPI, Next.js, and Supabase/pgvector that converts uploaded PDFs into spoken quizzes for active recall.", "Designed a RAG pipeline that feeds PDF text to the LLM to detect topic boundaries and page ranges, then chunks and embeds each topic-chunk with pgvector for embedding-based retrieval.", "Built a grader that transcribes spoken answers and scores them via cosine similarity against the reference (correct/partial/incorrect thresholds over keyword matching), with adaptive scoring that tracks per-topic accuracy and adjusts diffic... [truncated]", "Deployed end-to-end (FastAPI on Render, Next.js on Vercel), delivering a live PDF-to-quiz pipeline with an average quiz completion time of 2.83 seconds."], "descriptionStyles": ["bullet", "bullet", "bullet", "bullet"]}, {"id": 2, "project_name": "Citation Verification Engine", "project_years": "", "project_description": ["Engineered a deterministic legal AI safety engine in Next.js/TypeScript that extracts, normalizes, and verifies references across 6 Indian legal formats, resolving LLM hallucination at runtime.", "Designed a 3-pass validation algorithm using the Indian Kanoon API and Regex-based title matching to intercept fabricated references and auto-correct page/volume discrepancies.", "Implemented a bounded concurrency queue with 300 ms pacing and a database-driven caching layer, cutting external API calls by 75% and achieving cache-hit latencies under 15 ms."], "descriptionStyles": ["bullet", "bullet", "bullet"]}], "additional": {"technicalSkills": ["Python", "Java", "LangChain", "Pydantic", "LangGraph", "FastAPI", "MySQL", "Vector Databases", "Machine Learning", "Deep Learning", "NLP", "Transformers", "OpenAI", "REST APIs", "Docker", "Git", "GitHub", "Next.js", "Supabase", "pgvector", "TypeScript"], "languages": [], "certificationsTraining": [], "awards": []}, "customSections": [{"type": "itemList", "section_name": "Academic Positions & Leadership", "items": [{"title": "Class Representative", "subtitle": "", "years": "Oct 2024 - Jul 2025", "description": "Served as primary student-faculty liaison; participated in a college Hackathon and hosted events as a Public Speaker.", "descriptionStyles": ["plain"]}, {"title": "Literary Club Representative", "subtitle": "", "years": "Sep 2023 - Jul 2025", "description": "Represented the Literary Club by promoting creative writing, public speaking, and reading culture among students, and supporting the planning and hosting of club events and activities.", "descriptionStyles": ["plain"]}]}]}
+[ 2026-11-04 21:17:58,488 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+[ 2026-11-04 21:17:59,942 ] 214 backend.services.llm_services - INFO - OpenRouter produced keywords JSON on attempt 1/3: {"company": "DeepIQ", "role": "AI Engineer Intern — Generative AI & Data", "required_skills": ["Python", "SQL", "RESTful APIs", "LLMs", "Embeddings", "RAG", "Git", "Data Structures", "Algorithms"], "preferred_skills": ["LangChain", "LangGraph", "Django", "PostgreSQL", "Redis", "ChromaDB", "Qdrant", "Pinecone", "FAISS", "Semantic Search", "Hybrid Search", "Workflow Orchestration"], "experience_requirements": ["Currently pursuing or recently completed a degree"], "education_requirements": ["Bachelor’s or master’s degree in Computer Science, Engineering or a related discipline"], "key_responsibilities": ["Develop Python components for AI applications", "Build data pipelines for structured and unstructured data", "Integrate LLM APIs like OpenAI and Azure OpenAI", "Support RAG and Agentic RAG applications", "Develop AI agents and multi-agent workflows", "Build backend components and RESTful APIs using Django", "Write tests and participate in code reviews"], "keywords": ["Generative AI", "Data Ops", "LLM", "RAG", "Python", "Vector Databases", "AI Agents"], "experience_years": 0, "seniority_level": "internship"}
+[ 2026-11-04 21:18:01,566 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+[ 2026-11-04 21:18:04,555 ] 214 backend.services.llm_services - INFO - OpenRouter produced diff JSON on attempt 1/3: {"target_skills": [{"skill": "Python", "reason": "Primary language required for developing AI components and backend services at DeepIQ."}, {"skill": "RAG (Retrieval-Augmented Generation)", "reason": "Core job responsibility involving document ingestion, chunking, and embedding generation."}, {"skill": "LLMs & Generative AI", "reason": "Essential for integrating OpenAI/Azure APIs for information extraction and question answering."}, {"skill": "LangChain & LangGraph", "reason": "Directly mentioned as preferred frameworks for building AI agents and multi-agent workflows."}, {"skill": "Vector Databases (pgvector, ChromaDB)", "reason": "Required for implementing semantic search, hybrid search, and retrieval pipelines."}, {"skill": "RESTful APIs (FastAPI/Django)", "reason": "Required for building backend components; JD specifically requests Django familiarity."}, {"skill": "SQL & PostgreSQL", "reason": "Required for working with relational databases; PostgreSQL is the specific preferred stack."}, {"skill": "Git & GitHub", "reason": "Required for collaborative development, code reviews, and version control."}, {"skill": "Data Structures & Algorithms", "reason": "Explicitly listed as a required qualification for the AI Engineer Intern role."}, {"skill": "AI Agents", "reason": "Key focus area for the internship involving agentic workflows and automation."}, {"skill": "Embeddings & Semantic Search", "reason": "Necessary for the retrieval component of the company's Data + AI Ops platform."}], "strategy_notes": "Emphasize the 'Voice AI Agent' project as it demonstrates the full RAG lifecycle requested in the JD. Replace or supplement FastAPI mentions with Django where possible to align with their backend stack. Ensure the summary highlights 'Data O... [truncated]"}
+[ 2026-11-04 21:18:06,210 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+[ 2026-11-04 21:18:11,011 ] 214 backend.services.llm_services - INFO - OpenRouter produced diff JSON on attempt 1/3: {"changes": [{"path": "summary", "action": "replace", "original": "AI Engineer and Generative AI Developer experienced in building LLM-powered applications, optimizing prompts, and designing RAG (Retrieval-Augmented Generation) pipelines over vector databases. Skilled in developing AI agents with LangChain... [truncated]", "value": "AI Engineer and Generative AI Developer experienced in building LLM-powered applications, data pipelines, and designing RAG (Retrieval-Augmented Generation) pipelines over vector databases. Skilled in developing AI agents and multi-agent wo... [truncated]", "reason": "Aligned summary with JD terminology including 'data pipelines', 'multi-agent workflows', 'RESTful APIs', and 'hybrid search' while specifying the target role as an Intern."}, {"path": "workExperience[0].responsibilities[0]", "action": "replace", "original": "Engineered embedding-based retrieval pipelines for a healthcare RAG system over a vector database, improving retrieval relevance for domain-specific queries.", "value": "Engineered data pipelines and embedding-based retrieval for a healthcare RAG system, utilizing vector stores to improve retrieval relevance for domain-specific queries.", "reason": "Incorporated 'data pipelines' and 'vector stores' keywords as requested in the JD responsibilities."}, {"path": "workExperience[0].responsibilities[2]", "action": "replace", "original": "Developed a domain-specific healthcare chatbot with a custom deterministic orchestrator for query routing, including an escalation flow to doctor-consultation booking.", "value": "Developed a domain-specific healthcare AI agent with a custom deterministic orchestrator for workflow automation and query routing, including an escalation flow to doctor-consultation booking.", "reason": "Reframed 'chatbot' as 'AI agent' and added 'workflow automation' to match the JD's focus on agentic workflows."}, {"path": "projects[0].project_description[0]", "action": "replace", "original": "Built a full-stack, voice-based AI application using FastAPI, Next.js, and Supabase/pgvector that converts uploaded PDFs into spoken quizzes for active recall.", "value": "Built a full-stack, voice-based AI application using Python, FastAPI, and PostgreSQL/pgvector for document processing and information extraction from PDFs.", "reason": "Emphasized Python, PostgreSQL, and the JD-specific tasks of 'document processing' and 'information extraction'."}, {"path": "additional.technicalSkills", "action": "reorder", "original": null, "value": ["Python", "SQL", "RESTful APIs", "LLMs", "RAG", "LangChain", "LangGraph", "Vector Databases", "Git", "GitHub", "PostgreSQL", "pgvector", "FastAPI", "OpenAI", "Machine Learning", "Deep Learning", "NLP", "Transformers", "Docker", "Next.js", "Supabase", "TypeScript", "Java", "Pydantic", "MySQL"], "reason": "Prioritized the required and preferred skills listed in the job description."}, {"path": "additional.technicalSkills", "action": "add_skill", "original": null, "value": "AI Agents", "reason": "Added verified skill target supported by the candidate's experience with LangGraph and orchestrators."}], "strategy_notes": "The resume was tailored to emphasize Python, RAG, and AI Agents. Terminology was updated to match the JD (e.g., 'RESTful APIs', 'vector stores', 'workflow automation') while preserving the candidate's original accomplishments in healthcare ... [truncated]"}

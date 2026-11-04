@@ -13,6 +13,7 @@ OPENROUTER_API_KEY_4 = os.getenv("OPENROUTER_API_KEY_4")
 OPENROUTER_API_KEY_5 = os.getenv("OPENROUTER_API_KEY_5")
 OPENROUTER_API_KEY_6 = os.getenv("OPENROUTER_API_KEY_6")
 OPENROUTER_API_KEY_7 = os.getenv("OPENROUTER_API_KEY_7")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "google/gemini-3-flash-preview")
 
 
 KEY_ID = os.getenv("keyId")

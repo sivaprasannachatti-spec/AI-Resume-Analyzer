@@ -1,0 +1,2 @@
+[ 2026-11-04 21:11:38,742 ] 202 backend.services.llm_services - WARNING - OpenRouter request failed with configured key 1 (RuntimeError); trying the next configured key
+[ 2026-11-04 21:11:38,742 ] 214 backend.services.llm_services - INFO - OpenRouter produced generic JSON on attempt 1/1: {"ok": true}

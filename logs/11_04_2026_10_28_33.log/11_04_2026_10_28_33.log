@@ -1,0 +1,34 @@
+[ 2026-11-04 10:29:55,414 ] 53 backend.models.database - INFO - Database schema verified: resumes.master_resume_payload is available
+[ 2026-11-04 10:33:20,452 ] 901 docling.datamodel.document - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+[ 2026-11-04 10:33:25,060 ] 890 docling.document_converter - INFO - Going to convert document batch...
+[ 2026-11-04 10:33:25,074 ] 937 docling.document_converter - INFO - Initializing pipeline for StandardPdfPipeline with options hash 61dbdc300f0d0923a27e56e05a92f6fc
+[ 2026-11-04 10:33:25,253 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 10:33:25,264 ] 31 docling.models.factories - INFO - Registered picture descriptions: ['picture_description_vlm_engine', 'vlm', 'api']
+[ 2026-11-04 10:33:25,300 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 10:33:25,349 ] 21 docling.models.factories - INFO - Registered ocr engines: ['auto', 'easyocr', 'kserve_v2_ocr', 'nemotron-ocr', 'ocrmac', 'rapidocr', 'tesserocr', 'tesseract']
+[ 2026-11-04 10:33:25,349 ] 138 docling.models.stages.ocr.auto_ocr_model - INFO - rapidocr cannot be used because onnxruntime is not installed.
+[ 2026-11-04 10:33:25,349 ] 167 docling.models.stages.ocr.auto_ocr_model - INFO - easyocr cannot be used because it is not installed.
+[ 2026-11-04 10:33:26,523 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-04 10:33:26,544 ] 190 docling.models.stages.ocr.auto_ocr_model - INFO - Auto OCR model selected rapidocr with torch.
+[ 2026-11-04 10:33:26,564 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 10:33:26,581 ] 39 docling.models.factories - INFO - Registered layout engines: ['layout_object_detection', 'docling_layout_default', 'docling_experimental_table_crops_layout']
+[ 2026-11-04 10:33:33,220 ] 124 docling.models.inference_engines.object_detection.transformers_engine - INFO - Initializing Transformers object-detection engine
+[ 2026-11-04 10:33:33,220 ] 57 docling.models.inference_engines.common.hf_vision_base - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+[ 2026-11-04 10:33:33,220 ] 114 docling.models.utils.hf_model_download - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+[ 2026-11-04 10:33:33,515 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-layout-heron/revision/main "HTTP/1.1 200 OK"
+[ 2026-11-04 10:33:33,541 ] 125 docling.models.utils.hf_model_download - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\shiva\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+[ 2026-11-04 10:33:33,541 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-04 10:33:39,820 ] 198 docling.models.inference_engines.object_detection.transformers_engine - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+[ 2026-11-04 10:33:39,869 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 10:33:39,886 ] 49 docling.models.factories - INFO - Registered table structure engines: ['docling_tableformer', 'docling_tableformer_v2', 'granite_vision_table']
+[ 2026-11-04 10:33:39,886 ] 114 docling.models.utils.hf_model_download - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+[ 2026-11-04 10:33:40,169 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-models/revision/v2.3.0 "HTTP/1.1 200 OK"
+[ 2026-11-04 10:33:40,192 ] 125 docling.models.utils.hf_model_download - INFO - Model docling-project/docling-models already cached at C:\Users\shiva\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+[ 2026-11-04 10:33:40,257 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-04 10:33:41,261 ] 91 docling.pipeline.base_pipeline - INFO - Processing document Updated_Resume_v2.pdf
+[ 2026-11-04 10:33:51,857 ] 916 docling.document_converter - INFO - Finished converting document Updated_Resume_v2.pdf in 31.41 sec.
+[ 2026-11-04 10:33:54,538 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[ 2026-11-04 10:33:54,539 ] 1896 openai._base_client - INFO - Retrying request in 0.375629 seconds (retry 1 of 2)
+[ 2026-11-04 10:33:56,495 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+[ 2026-11-04 10:33:56,496 ] 1896 openai._base_client - INFO - Retrying request in 0.993398 seconds (retry 2 of 2)
+[ 2026-11-04 10:33:59,132 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 429 Too Many Requests"

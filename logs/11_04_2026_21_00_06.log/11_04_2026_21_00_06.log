@@ -1,0 +1,143 @@
+[ 2026-11-04 21:00:23,071 ] 67 backend.models.database - INFO - Database schema verified: resumes.master_resume_payload is available
+[ 2026-11-04 21:04:25,349 ] 70 backend.services.upload_file_service - INFO - Starting object storage upload (endpoint=s3.us-east-005.backblazeb2.com, bucket=AI-Resume-Analyser, content_type=application/pdf)
+[ 2026-11-04 21:05:48,638 ] 104 backend.services.upload_file_service - ERROR - Storage client/network failure during upload (endpoint=s3.us-east-005.backblazeb2.com, bucket=AI-Resume-Analyser, duration_seconds=83.29, error_type=ConnectionClosedError)
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 499, in _make_request
+    conn.request(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 96, in request
+    rval = super().request(method, url, body, headers, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connection.py", line 581, in request
+    self.send(chunk)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 223, in send
+    return super().send(str)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\http\client.py", line 1077, in send
+    self.sock.sendall(data)
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1210, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1179, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionAbortedError: [Errno 10053] An established connection was aborted by the software in your host machine
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\httpsession.py", line 509, in send
+    urllib_response = conn.urlopen(
+                      ^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 847, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\util\retry.py", line 485, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\util\util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 499, in _make_request
+    conn.request(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 96, in request
+    rval = super().request(method, url, body, headers, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connection.py", line 581, in request
+    self.send(chunk)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 223, in send
+    return super().send(str)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\http\client.py", line 1077, in send
+    self.sock.sendall(data)
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1210, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1179, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.ProtocolError: ('Connection aborted.', ConnectionAbortedError(10053, 'An established connection was aborted by the software in your host machine'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\backend\services\upload_file_service.py", line 78, in sync_file_upload
+    client.upload_fileobj(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\boto3\s3\inject.py", line 678, in upload_fileobj
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\futures.py", line 111, in result
+    return self._coordinator.result()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\futures.py", line 287, in result
+    raise self._exception
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\tasks.py", line 142, in __call__
+    return self._execute_main(kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\tasks.py", line 165, in _execute_main
+    return_value = self._main(**kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\upload.py", line 796, in _main
+    client.put_object(Bucket=bucket, Key=key, Body=body, **extra_args)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 1076, in _make_api_call
+    http, parsed_response = self._make_request(
+                            ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 1100, in _make_request
+    return self._endpoint.make_request(operation_model, request_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 119, in make_request
+    return self._send_request(request_dict, operation_model)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 231, in _send_request
+    raise exception
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 281, in _do_get_response
+    http_response = self._send(request)
+                    ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 385, in _send
+    return self.http_session.send(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\httpsession.py", line 550, in send
+    raise ConnectionClosedError(
+botocore.exceptions.ConnectionClosedError: Connection was closed before we received a valid response from endpoint URL: "https://s3.us-east-005.backblazeb2.com/AI-Resume-Analyser/Updated_Resume_v2.pdf".
+[ 2026-11-04 21:05:49,185 ] 901 docling.datamodel.document - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+[ 2026-11-04 21:05:52,615 ] 890 docling.document_converter - INFO - Going to convert document batch...
+[ 2026-11-04 21:05:52,615 ] 937 docling.document_converter - INFO - Initializing pipeline for StandardPdfPipeline with options hash ba8bf92bf95d8476a9d286ff1cc4571b
+[ 2026-11-04 21:05:52,639 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 21:05:52,646 ] 31 docling.models.factories - INFO - Registered picture descriptions: ['picture_description_vlm_engine', 'vlm', 'api']
+[ 2026-11-04 21:05:52,672 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 21:05:52,697 ] 21 docling.models.factories - INFO - Registered ocr engines: ['auto', 'easyocr', 'kserve_v2_ocr', 'nemotron-ocr', 'ocrmac', 'rapidocr', 'tesserocr', 'tesseract']
+[ 2026-11-04 21:05:52,710 ] 138 docling.models.stages.ocr.auto_ocr_model - INFO - rapidocr cannot be used because onnxruntime is not installed.
+[ 2026-11-04 21:05:52,712 ] 167 docling.models.stages.ocr.auto_ocr_model - INFO - easyocr cannot be used because it is not installed.
+[ 2026-11-04 21:05:53,295 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-04 21:05:53,331 ] 190 docling.models.stages.ocr.auto_ocr_model - INFO - Auto OCR model selected rapidocr with torch.
+[ 2026-11-04 21:05:53,352 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 21:05:53,359 ] 39 docling.models.factories - INFO - Registered layout engines: ['layout_object_detection', 'docling_layout_default', 'docling_experimental_table_crops_layout']
+[ 2026-11-04 21:05:58,841 ] 124 docling.models.inference_engines.object_detection.transformers_engine - INFO - Initializing Transformers object-detection engine
+[ 2026-11-04 21:05:58,841 ] 57 docling.models.inference_engines.common.hf_vision_base - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+[ 2026-11-04 21:05:58,841 ] 114 docling.models.utils.hf_model_download - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+[ 2026-11-04 21:05:59,156 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-layout-heron/revision/main "HTTP/1.1 200 OK"
+[ 2026-11-04 21:05:59,208 ] 125 docling.models.utils.hf_model_download - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\shiva\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+[ 2026-11-04 21:05:59,210 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-04 21:06:01,373 ] 198 docling.models.inference_engines.object_detection.transformers_engine - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+[ 2026-11-04 21:06:01,402 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-04 21:06:01,420 ] 49 docling.models.factories - INFO - Registered table structure engines: ['docling_tableformer', 'docling_tableformer_v2', 'granite_vision_table']
+[ 2026-11-04 21:06:01,420 ] 114 docling.models.utils.hf_model_download - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+[ 2026-11-04 21:06:01,645 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-models/revision/v2.3.0 "HTTP/1.1 200 OK"
+[ 2026-11-04 21:06:01,670 ] 125 docling.models.utils.hf_model_download - INFO - Model docling-project/docling-models already cached at C:\Users\shiva\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+[ 2026-11-04 21:06:01,707 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-04 21:06:02,597 ] 91 docling.pipeline.base_pipeline - INFO - Processing document Updated_Resume_v2.pdf
+[ 2026-11-04 21:06:06,872 ] 916 docling.document_converter - INFO - Finished converting document Updated_Resume_v2.pdf in 17.69 sec.
+[ 2026-11-04 21:06:07,625 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 402 Payment Required"

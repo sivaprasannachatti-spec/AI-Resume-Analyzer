@@ -1,0 +1,311 @@
+[ 2026-11-04 16:19:17,397 ] 53 backend.models.database - INFO - Database schema verified: resumes.master_resume_payload is available
+[ 2026-11-04 16:19:41,305 ] 120 backend.services.upload_file_service - INFO - Uploading 1 file(s) with 1 worker(s)
+[ 2026-11-04 16:19:41,309 ] 63 backend.services.upload_file_service - INFO - Starting object storage upload (endpoint=s3.us-west-002.backblazeb2.com, bucket=AI-Resume-Analyser, content_type=application/pdf)
+[ 2026-11-04 16:19:54,403 ] 97 backend.services.upload_file_service - ERROR - Storage client/network failure during upload (endpoint=s3.us-west-002.backblazeb2.com, bucket=AI-Resume-Analyser, duration_seconds=13.10, error_type=ConnectionClosedError)
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 499, in _make_request
+    conn.request(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 96, in request
+    rval = super().request(method, url, body, headers, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connection.py", line 579, in request
+    self.send(b"%x\r\n%b\r\n" % (len(chunk), chunk))
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 223, in send
+    return super().send(str)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\http\client.py", line 1077, in send
+    self.sock.sendall(data)
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1210, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1179, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionAbortedError: [Errno 10053] An established connection was aborted by the software in your host machine
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\httpsession.py", line 509, in send
+    urllib_response = conn.urlopen(
+                      ^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 847, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\util\retry.py", line 485, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\util\util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 499, in _make_request
+    conn.request(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 96, in request
+    rval = super().request(method, url, body, headers, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connection.py", line 579, in request
+    self.send(b"%x\r\n%b\r\n" % (len(chunk), chunk))
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 223, in send
+    return super().send(str)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\http\client.py", line 1077, in send
+    self.sock.sendall(data)
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1210, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1179, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.ProtocolError: ('Connection aborted.', ConnectionAbortedError(10053, 'An established connection was aborted by the software in your host machine'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\backend\services\upload_file_service.py", line 71, in sync_file_upload
+    client.upload_fileobj(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\boto3\s3\inject.py", line 678, in upload_fileobj
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\futures.py", line 111, in result
+    return self._coordinator.result()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\futures.py", line 287, in result
+    raise self._exception
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\tasks.py", line 142, in __call__
+    return self._execute_main(kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\tasks.py", line 165, in _execute_main
+    return_value = self._main(**kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\upload.py", line 796, in _main
+    client.put_object(Bucket=bucket, Key=key, Body=body, **extra_args)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 1076, in _make_api_call
+    http, parsed_response = self._make_request(
+                            ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 1100, in _make_request
+    return self._endpoint.make_request(operation_model, request_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 119, in make_request
+    return self._send_request(request_dict, operation_model)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 202, in _send_request
+    while self._needs_retry(
+          ^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 362, in _needs_retry
+    responses = self._event_emitter.emit(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\hooks.py", line 412, in emit
+    return self._emitter.emit(aliased_event_name, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\hooks.py", line 256, in emit
+    return self._emit(event_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\hooks.py", line 239, in _emit
+    response = handler(**kwargs)
+               ^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 207, in __call__
+    if self._checker(**checker_kwargs):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 284, in __call__
+    should_retry = self._should_retry(
+                   ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 320, in _should_retry
+    return self._checker(attempt_number, response, caught_exception)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 363, in __call__
+    checker_response = checker(
+                       ^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 247, in __call__
+    return self._check_caught_exception(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 416, in _check_caught_exception
+    raise caught_exception
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 281, in _do_get_response
+    http_response = self._send(request)
+                    ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 385, in _send
+    return self.http_session.send(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\httpsession.py", line 550, in send
+    raise ConnectionClosedError(
+botocore.exceptions.ConnectionClosedError: Connection was closed before we received a valid response from endpoint URL: "https://s3.us-west-002.backblazeb2.com/AI-Resume-Analyser/52baa77f2f3a498c9ca929c27110a4e8_Updated_Resume_v2.pdf".
+[ 2026-11-04 16:19:54,420 ] 133 backend.services.upload_file_service - ERROR - Batch file upload or resume-record persistence failed
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 499, in _make_request
+    conn.request(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 96, in request
+    rval = super().request(method, url, body, headers, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connection.py", line 579, in request
+    self.send(b"%x\r\n%b\r\n" % (len(chunk), chunk))
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 223, in send
+    return super().send(str)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\http\client.py", line 1077, in send
+    self.sock.sendall(data)
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1210, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1179, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionAbortedError: [Errno 10053] An established connection was aborted by the software in your host machine
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\httpsession.py", line 509, in send
+    urllib_response = conn.urlopen(
+                      ^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 847, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\util\retry.py", line 485, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\util\util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 499, in _make_request
+    conn.request(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 96, in request
+    rval = super().request(method, url, body, headers, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connection.py", line 579, in request
+    self.send(b"%x\r\n%b\r\n" % (len(chunk), chunk))
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 223, in send
+    return super().send(str)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\http\client.py", line 1077, in send
+    self.sock.sendall(data)
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1210, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1179, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.ProtocolError: ('Connection aborted.', ConnectionAbortedError(10053, 'An established connection was aborted by the software in your host machine'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\backend\services\upload_file_service.py", line 71, in sync_file_upload
+    client.upload_fileobj(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\boto3\s3\inject.py", line 678, in upload_fileobj
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\futures.py", line 111, in result
+    return self._coordinator.result()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\futures.py", line 287, in result
+    raise self._exception
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\tasks.py", line 142, in __call__
+    return self._execute_main(kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\tasks.py", line 165, in _execute_main
+    return_value = self._main(**kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\upload.py", line 796, in _main
+    client.put_object(Bucket=bucket, Key=key, Body=body, **extra_args)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 1076, in _make_api_call
+    http, parsed_response = self._make_request(
+                            ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 1100, in _make_request
+    return self._endpoint.make_request(operation_model, request_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 119, in make_request
+    return self._send_request(request_dict, operation_model)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 202, in _send_request
+    while self._needs_retry(
+          ^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 362, in _needs_retry
+    responses = self._event_emitter.emit(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\hooks.py", line 412, in emit
+    return self._emitter.emit(aliased_event_name, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\hooks.py", line 256, in emit
+    return self._emit(event_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\hooks.py", line 239, in _emit
+    response = handler(**kwargs)
+               ^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 207, in __call__
+    if self._checker(**checker_kwargs):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 284, in __call__
+    should_retry = self._should_retry(
+                   ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 320, in _should_retry
+    return self._checker(attempt_number, response, caught_exception)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 363, in __call__
+    checker_response = checker(
+                       ^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 247, in __call__
+    return self._check_caught_exception(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\retryhandler.py", line 416, in _check_caught_exception
+    raise caught_exception
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 281, in _do_get_response
+    http_response = self._send(request)
+                    ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 385, in _send
+    return self.http_session.send(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\httpsession.py", line 550, in send
+    raise ConnectionClosedError(
+botocore.exceptions.ConnectionClosedError: Connection was closed before we received a valid response from endpoint URL: "https://s3.us-west-002.backblazeb2.com/AI-Resume-Analyser/52baa77f2f3a498c9ca929c27110a4e8_Updated_Resume_v2.pdf".
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\backend\services\upload_file_service.py", line 123, in upload_file
+    urls = list(executor.map(sync_file_upload, file_objs, file_name, content_types))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 619, in result_iterator
+    yield _result_or_cancel(fs.pop())
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 317, in _result_or_cancel
+    return fut.result(timeout)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 456, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\backend\services\upload_file_service.py", line 105, in sync_file_upload
+    raise CustomException(e, sys)
+src.exception.CustomException: Error occured in python script name [C:\AI Resume Analyser\backend\services\upload_file_service.py] line number [71] error message[Connection was closed before we received a valid response from endpoint URL: "https://s3.us-west-002.backblazeb2.com/AI-Resume-Analyser/52baa77f2f3a498c9ca929c27110a4e8_Updated_Resume_v2.pdf".]

@@ -1,0 +1,238 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #f5f7fb;
+    --bg-surface: #ffffff;
+    --bg-elevated: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.78);
+    --border-subtle: rgba(30, 41, 59, 0.1);
+    --border-strong: rgba(30, 41, 59, 0.16);
+    --border-focus: #5664d9;
+    --text-heading: #162033;
+    --text-body: #3d4a5f;
+    --text-muted: #718096;
+    --primary-accent: #5664d9;
+    --secondary-accent: #2a9d8f;
+    --warm-accent: #c58b32;
+    --primary-gradient: linear-gradient(135deg, #5664d9 0%, #6875e5 52%, #8a71c7 100%);
+    --card-shadow: 0 18px 45px -28px rgba(31, 41, 55, 0.35), 0 5px 16px -10px rgba(31, 41, 55, 0.12);
+    --card-shadow-hover: 0 24px 55px -26px rgba(86, 100, 217, 0.28), 0 12px 20px -14px rgba(31, 41, 55, 0.18);
+    --ring: rgba(86, 100, 217, 0.24);
+    --radius-card: 1.35rem;
+  }
+
+  [data-theme="dark"] {
+    --bg-main: #0d1017;
+    --bg-surface: #131821;
+    --bg-elevated: #1a202b;
+    --bg-card: rgba(20, 25, 35, 0.8);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.13);
+    --border-focus: #8b93ff;
+    --text-heading: #edeff5;
+    --text-body: #b7bdca;
+    --text-muted: #7d8597;
+    --primary-accent: #8b93ff;
+    --secondary-accent: #5ec4b6;
+    --warm-accent: #e8b04b;
+    --primary-gradient: linear-gradient(135deg, #7079e8 0%, #8b93ff 52%, #a78bfa 100%);
+    --card-shadow: 0 22px 55px -28px rgba(0, 0, 0, 0.7), 0 8px 18px -14px rgba(0, 0, 0, 0.45);
+    --card-shadow-hover: 0 26px 65px -28px rgba(112, 121, 232, 0.22), 0 12px 22px -16px rgba(0, 0, 0, 0.5);
+    --ring: rgba(139, 147, 255, 0.25);
+  }
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-body);
+  font-family: var(--font-geist-sans), "Inter", ui-sans-serif, system-ui, sans-serif;
+  overflow-x: hidden;
+  letter-spacing: -0.011em;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* Elegant Apple/Linear style blurred glass panel */
+.premium-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.premium-card:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--ring);
+  transform: translateY(-4px);
+}
+
+.ambient-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(86, 100, 217, 0.1), transparent 34%),
+    radial-gradient(circle at 84% 18%, rgba(42, 157, 143, 0.07), transparent 32%),
+    radial-gradient(circle at 55% 90%, rgba(197, 139, 50, 0.05), transparent 34%);
+  animation: ambient-drift 18s ease-in-out infinite alternate;
+}
+
+[data-theme="dark"] .ambient-canvas {
+  background: 
+    radial-gradient(circle at 18% 12%, rgba(112, 121, 232, 0.16), transparent 38%),
+    radial-gradient(circle at 82% 24%, rgba(94, 196, 182, 0.09), transparent 36%),
+    radial-gradient(circle at 50% 88%, rgba(232, 176, 75, 0.06), transparent 38%);
+}
+
+.glass-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.reveal-up {
+  animation: reveal-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.reveal-delay-1 { animation-delay: 80ms; }
+.reveal-delay-2 { animation-delay: 160ms; }
+.reveal-delay-3 { animation-delay: 240ms; }
+.reveal-delay-4 { animation-delay: 320ms; }
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.focus-ring:focus-visible,
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+}
+
+@keyframes ambient-drift {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to { transform: scale(1.05) translate3d(0, -1%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes resume-progress-slide {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(320%);
+  }
+}
+
+.resume-progress-sweep {
+  animation: resume-progress-slide 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resume-progress-sweep {
+    animation-duration: 5s;
+  }
+}
+
+/* Sleek subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.45);
+}
+
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Force hide all page UI, banners, navbars, sidebars, buttons */
+  .ambient-canvas,
+  nav,
+  aside,
+  button,
+  .print\:hidden {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Make only the resume document visible */
+  body * {
+    visibility: hidden;
+  }
+
+  #resume-document-sheet,
+  #resume-document-sheet * {
+    visibility: visible;
+  }
+
+  #resume-document-sheet {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .resume-paper {
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}

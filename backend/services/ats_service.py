@@ -3,7 +3,7 @@ import re
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 from src.exception import CustomException
 from backend.models.database import engine
 from backend.models.schemas import ResumeAnalysis
@@ -450,29 +450,51 @@ def evaluate_and_save_ats_analysis(
     resume: Union[Dict[str, Any], ResumeSchema],
     jd: Union[Dict[str, Any], JDSchema],
     raw_jd_text: str = "",
+    original_resume: Union[Dict[str, Any], ResumeSchema, None] = None,
 ) -> ResumeAnalysis:
     """
-    Computes the ATS score and commits a ResumeAnalysis record into PostgreSQL.
+    Computes original and tailored scores and saves them together in ResumeAnalysis.
     """
     try:
-        score_data = compute_ats_score(resume=resume, jd=jd)
+        tailored_score_data = compute_ats_score(resume=resume, jd=jd)
+        original_score_data = compute_ats_score(
+            resume=original_resume if original_resume is not None else resume,
+            jd=jd,
+        )
         jd_dict = _normalize_to_dict(jd)
 
         # Format ATS issues dictionary for structured DB storage
         ats_issues_payload = [
             {"type": "recommendation", "issue": tip}
-            for tip in score_data["recommendations"]
+            for tip in tailored_score_data["recommendations"]
         ]
 
         with Session(engine) as session:
-            analysis = ResumeAnalysis(
-                resume_id=resume_id,
-                jd=raw_jd_text or jd_dict.get("job_description") or jd_dict.get("role") or "",
-                match_score=score_data["overall_score"],
-                key_skills=score_data["key_skills"],
-                missing_skills=score_data["missing_skills"],
-                ats_issues=ats_issues_payload,
+            job_description = (
+                raw_jd_text
+                or jd_dict.get("job_description")
+                or jd_dict.get("role")
+                or ""
             )
+            analysis = session.exec(
+                select(ResumeAnalysis)
+                .where(
+                    ResumeAnalysis.resume_id == resume_id,
+                    ResumeAnalysis.jd == job_description,
+                )
+                .order_by(ResumeAnalysis.analysis_id.desc())
+            ).first()
+            if not analysis:
+                analysis = ResumeAnalysis(
+                    resume_id=resume_id,
+                    jd=job_description,
+                    match_score=original_score_data["overall_score"],
+                )
+            analysis.match_score = original_score_data["overall_score"]
+            analysis.tailored_match_score = tailored_score_data["overall_score"]
+            analysis.key_skills = tailored_score_data["key_skills"]
+            analysis.missing_skills = tailored_score_data["missing_skills"]
+            analysis.ats_issues = ats_issues_payload
             session.add(analysis)
             session.commit()
             session.refresh(analysis)

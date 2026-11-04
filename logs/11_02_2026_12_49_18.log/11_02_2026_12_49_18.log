@@ -1,0 +1,1 @@
+[ 2026-11-02 12:49:18,104 ] 142 backend.services.llm_services - WARNING - OpenRouter returned invalid keywords JSON on attempt 1/3: LLM response did not contain a JSON object
