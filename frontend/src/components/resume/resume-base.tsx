@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React from "react";
 import { ResumeSchema, WorkExperience, Project, Education, CustomSection } from "@/types/resume";
 import {
   TemplateSettings,
@@ -80,13 +80,54 @@ function parseListSection(val: any): string[] {
   return [];
 }
 
+function getCustomSectionEntries(
+  sections: ResumeSchema["customSections"],
+): Array<[string, CustomSection]> {
+  if (Array.isArray(sections)) {
+    return sections.map((section, index) => [
+      section.key || `custom_${index + 1}`,
+      section,
+    ]);
+  }
+  return sections && typeof sections === "object"
+    ? Object.entries(sections)
+    : [];
+}
+
+function formatCustomSectionTitle(key: string): string {
+  return key
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function formatSocialLinkLabel(value: string): string {
+  const key = value.toLowerCase().replace(/_url$/, "").replace(/[-_]+/g, " ").trim();
+  const knownLabels: Record<string, string> = {
+    x: "X",
+    dev: "DEV",
+    devto: "DEV",
+    github: "GitHub",
+    linkedin: "LinkedIn",
+    medium: "Medium",
+    stackoverflow: "Stack Overflow",
+    "stack overflow": "Stack Overflow",
+  };
+  return knownLabels[key] ?? key.replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function normalizeExternalUrl(value: string): string {
+  const trimmed = value.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/\//, "")}`;
+}
+
 export function ResumeBase({
   resume,
   settings = DEFAULT_TEMPLATE_SETTINGS,
   variant,
 }: ResumeTemplateProps) {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [fitScale, setFitScale] = useState(1);
   const templateId: ResumeTemplateId = (variant as ResumeTemplateId) || settings.template || "swiss-single";
   const accent = ACCENT_COLOR_MAP[settings.accentColor] || ACCENT_COLOR_MAP.blue;
   const isCompact = settings.compactMode;
@@ -111,8 +152,9 @@ export function ResumeBase({
   const resumeStyle = {
     ...settingsToCssVars(settings),
     width: pageWidth,
-    height: pageHeight,
-    maxHeight: pageHeight,
+    minHeight: pageHeight,
+    height: "auto",
+    maxHeight: "none",
     paddingTop: `${marginTop}mm`,
     paddingBottom: `${marginBottom}mm`,
     paddingLeft: `${marginLeft}mm`,
@@ -120,7 +162,7 @@ export function ResumeBase({
     fontSize: baseFontSize,
     lineHeight,
     fontFamily: bodyFont,
-    overflow: "hidden",
+    overflow: "visible",
     backgroundColor: "#ffffff",
     color: "#0f172a",
   } as React.CSSProperties;
@@ -130,32 +172,8 @@ export function ResumeBase({
       ? "ui-monospace, monospace"
       : "Arial, sans-serif";
 
-  useLayoutEffect(() => {
-    const content = contentRef.current;
-    if (!content) return;
-
-    const pageHeightMm = isA4 ? 297 : 279.4;
-    const availableHeight =
-      (pageHeightMm - marginTop - marginBottom) * (96 / 25.4);
-    const updateFit = () => {
-      const contentHeight = content.scrollHeight;
-      if (contentHeight > 0) {
-        setFitScale(Math.min(1, availableHeight / contentHeight));
-      }
-    };
-
-    updateFit();
-    const observer = new ResizeObserver(updateFit);
-    observer.observe(content);
-    document.fonts?.ready.then(updateFit);
-    window.addEventListener("beforeprint", updateFit);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("beforeprint", updateFit);
-    };
-  }, [resume, settings, isA4, marginTop, marginBottom]);
-
   const { personalInfo, summary, workExperience = [], projects = [], education = [], customSections = [] } = resume;
+  const customSectionEntries = getCustomSectionEntries(customSections);
   const { categories: skillCategories, flatList: technicalSkills } = parseSkills(resume);
 
   const add: any = Array.isArray(resume.additional) ? resume.additional[0] || {} : resume.additional || {};
@@ -169,61 +187,73 @@ export function ResumeBase({
   // -------------------------------------------------------------
   // Contact Bar
   // -------------------------------------------------------------
-  const ContactInfo = ({ centered = false, icons = false }: { centered?: boolean; icons?: boolean }) => (
-    <div
-      className={`flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[length:var(--font-size-body)] text-slate-600 ${
-        centered ? "justify-center" : "justify-start"
-      }`}
-    >
-      {personalInfo.email && (
-        <a
-          href={`mailto:${personalInfo.email}`}
-          className="flex items-center gap-1 text-slate-700 hover:text-slate-900 transition-colors"
-        >
-          {icons && <Mail className="w-2.5 h-2.5 text-slate-400 shrink-0" />}
-          <span>{personalInfo.email}</span>
-        </a>
-      )}
-      {personalInfo.phone && (
-        <span className="flex items-center gap-1 text-slate-700">
-          <span className="text-slate-300">|</span>
-          {icons && <Phone className="w-2.5 h-2.5 text-slate-400 shrink-0" />}
-          <span>{personalInfo.phone}</span>
-        </span>
-      )}
-      {personalInfo.location && (
-        <span className="flex items-center gap-1 text-slate-700">
-          <span className="text-slate-300">|</span>
-          {icons && <MapPin className="w-2.5 h-2.5 text-slate-400 shrink-0" />}
-          <span>{personalInfo.location}</span>
-        </span>
-      )}
-      {personalInfo.linkedin_url && (
-        <a
-          href={personalInfo.linkedin_url.startsWith("http") ? personalInfo.linkedin_url : `https://${personalInfo.linkedin_url}`}
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-1 text-blue-600 hover:underline"
-        >
-          <span className="text-slate-300">|</span>
-          {icons && <LinkedinIcon className="w-2.5 h-2.5 text-blue-600 shrink-0" />}
-          <span>LinkedIn</span>
-        </a>
-      )}
-      {personalInfo.github_url && (
-        <a
-          href={personalInfo.github_url.startsWith("http") ? personalInfo.github_url : `https://${personalInfo.github_url}`}
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-1 text-slate-800 hover:underline"
-        >
-          <span className="text-slate-300">|</span>
-          {icons && <GithubIcon className="w-2.5 h-2.5 text-slate-700 shrink-0" />}
-          <span>GitHub</span>
-        </a>
-      )}
-    </div>
-  );
+  const ContactInfo = ({ centered = false, icons = false }: { centered?: boolean; icons?: boolean }) => {
+    const profileLinks = [
+      { label: "LinkedIn", url: personalInfo.linkedin_url, className: "text-blue-600" },
+      { label: "GitHub", url: personalInfo.github_url, className: "text-slate-800" },
+      { label: "Twitter / X", url: personalInfo.twitter_url, className: "text-slate-700" },
+      { label: "Portfolio", url: personalInfo.portfolio_url, className: "text-slate-700" },
+      ...Object.entries(personalInfo.other_links ?? {}).map(([label, url]) => ({
+        label: formatSocialLinkLabel(label),
+        url,
+        className: "text-slate-700",
+      })),
+    ].filter(
+      (link): link is { label: string; url: string; className: string } =>
+        typeof link.url === "string" && link.url.trim().length > 0,
+    );
+
+    return (
+      <div
+        className={`flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[length:var(--font-size-body)] text-slate-600 ${
+          centered ? "justify-center" : "justify-start"
+        }`}
+      >
+        {personalInfo.email && (
+          <a
+            href={`mailto:${personalInfo.email}`}
+            className="flex items-center gap-1 text-slate-700 transition-colors hover:text-slate-900"
+          >
+            {icons && <Mail className="h-2.5 w-2.5 shrink-0 text-slate-400" />}
+            <span>{personalInfo.email}</span>
+          </a>
+        )}
+        {personalInfo.phone && (
+          <span className="flex items-center gap-1 text-slate-700">
+            <span className="text-slate-300">|</span>
+            {icons && <Phone className="h-2.5 w-2.5 shrink-0 text-slate-400" />}
+            <span>{personalInfo.phone}</span>
+          </span>
+        )}
+        {personalInfo.location && (
+          <span className="flex items-center gap-1 text-slate-700">
+            <span className="text-slate-300">|</span>
+            {icons && <MapPin className="h-2.5 w-2.5 shrink-0 text-slate-400" />}
+            <span>{personalInfo.location}</span>
+          </span>
+        )}
+        {profileLinks.map((link) => (
+          <a
+            key={`${link.label}-${link.url}`}
+            href={normalizeExternalUrl(link.url)}
+            target="_blank"
+            rel="noreferrer"
+            className={`flex items-center gap-1 hover:underline ${link.className}`}
+          >
+            <span className="text-slate-300">|</span>
+            {icons && (
+              link.label === "LinkedIn"
+                ? <LinkedinIcon className="h-2.5 w-2.5 shrink-0" />
+                : link.label === "GitHub"
+                  ? <GithubIcon className="h-2.5 w-2.5 shrink-0" />
+                  : <ExternalLink className="h-2.5 w-2.5 shrink-0" />
+            )}
+            <span>{link.label}</span>
+          </a>
+        ))}
+      </div>
+    );
+  };
 
   // -------------------------------------------------------------
   // Section Headings matching Template Style
@@ -295,15 +325,15 @@ export function ResumeBase({
         <SectionHeading title="Education" />
         <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
           {education.map((edu: Education, idx: number) => (
-            <div key={`${edu.institution}-${idx}`} className="flex justify-between items-baseline gap-2 text-left">
-              <div className="truncate">
+            <div key={`${edu.institution}-${idx}`} className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-left">
+              <div className="min-w-0 flex-1 break-words">
                 <span className="font-bold text-[length:var(--font-size-body)] text-slate-900">{edu.degree}</span>
                 <span className="text-slate-600 text-[length:var(--font-size-body)]"> — {edu.institution}</span>
                 {edu.description && (
                   <span className="text-slate-500 font-medium text-[length:var(--font-size-meta)] ml-1">({edu.description})</span>
                 )}
               </div>
-              <div className="text-[length:var(--font-size-meta)] text-slate-500 whitespace-nowrap font-medium">{edu.years}</div>
+              <div className="ml-auto shrink-0 text-right text-[length:var(--font-size-meta)] text-slate-500 whitespace-nowrap font-medium">{edu.years}</div>
             </div>
           ))}
         </div>
@@ -360,8 +390,8 @@ export function ResumeBase({
         <div style={{ display: "flex", flexDirection: "column", gap: itemGap }}>
           {workExperience.map((exp: WorkExperience, idx: number) => (
             <div key={`${exp.company}-${idx}`} className="text-left">
-              <div className="flex justify-between items-baseline gap-2">
-                <div className="font-bold text-[length:var(--font-size-body)] text-slate-900">
+              <div className="flex flex-wrap justify-between items-baseline gap-x-2 gap-y-0.5">
+                <div className="min-w-0 flex-1 break-words font-bold text-[length:var(--font-size-body)] text-slate-900">
                   {exp.title}{" "}
                   <span className="font-semibold text-slate-700" style={{ color: accent.primary }}>
                     · {exp.company}
@@ -370,7 +400,7 @@ export function ResumeBase({
                     <span className="font-normal text-[length:var(--font-size-meta)] text-slate-500 ml-1.5">({exp.location})</span>
                   )}
                 </div>
-                <div className="text-[length:var(--font-size-meta)] text-slate-500 font-medium whitespace-nowrap">
+                <div className="ml-auto shrink-0 text-right text-[length:var(--font-size-meta)] text-slate-500 font-medium whitespace-nowrap">
                   {exp.years}
                 </div>
               </div>
@@ -396,8 +426,8 @@ export function ResumeBase({
         <div style={{ display: "flex", flexDirection: "column", gap: itemGap }}>
           {projects.map((proj: Project, idx: number) => (
             <div key={`${proj.project_name}-${idx}`} className="text-left">
-              <div className="flex justify-between items-baseline gap-2">
-                <div className="font-bold text-[length:var(--font-size-body)] text-slate-900">
+              <div className="flex flex-wrap justify-between items-baseline gap-x-2 gap-y-0.5">
+                <div className="min-w-0 flex-1 break-words font-bold text-[length:var(--font-size-body)] text-slate-900">
                   {proj.project_name}
                   {proj.project_technologies && proj.project_technologies.length > 0 && (
                     <span className="font-normal text-[length:var(--font-size-meta)] text-slate-500 ml-1.5">
@@ -405,7 +435,7 @@ export function ResumeBase({
                     </span>
                   )}
                 </div>
-                <div className="text-[length:var(--font-size-meta)] text-slate-500 font-medium whitespace-nowrap">
+                <div className="ml-auto shrink-0 text-right text-[length:var(--font-size-meta)] text-slate-500 font-medium whitespace-nowrap">
                   {proj.project_years}
                 </div>
               </div>
@@ -424,35 +454,85 @@ export function ResumeBase({
   };
 
   const CustomSectionsRenderer = () => {
-    if (!customSections || customSections.length === 0) return null;
+    if (customSectionEntries.length === 0) return null;
     return (
       <>
-        {customSections.map((sec: any, sIdx: number) => {
-          const title = sec.title || (sec.key ? sec.key.replaceAll("_", " ") : "Additional");
-          const items = sec.items || [];
-          if (!items.length) return null;
+        {customSectionEntries.map(([key, section], sIdx) => {
+          const title = section.title
+            || section.key
+            || (Array.isArray(customSections) ? "Additional" : formatCustomSectionTitle(key));
+          const sectionType = section.sectionType
+            || (section.text !== undefined
+              ? "text"
+              : section.strings
+                ? "stringList"
+                : section.items
+                  ? "itemList"
+                  : undefined);
+          const items = Array.isArray(section.items) ? section.items : [];
+          const strings = Array.isArray(section.strings) ? section.strings : [];
+          const text = typeof section.text === "string" ? section.text.trim() : "";
+          if (
+            (sectionType === "text" && !text)
+            || (sectionType === "stringList" && strings.length === 0)
+            || ((sectionType === "itemList" || !sectionType) && items.length === 0)
+          ) {
+            return null;
+          }
           return (
-            <section key={sIdx} style={{ marginBottom: sectionGap }}>
+            <section key={`${key}-${sIdx}`} style={{ marginBottom: sectionGap }}>
               <SectionHeading title={title} />
-              <div style={{ display: "flex", flexDirection: "column", gap: itemGap }}>
-                {items.map((item: any, iIdx: number) => (
-                  <div key={iIdx} className="text-left">
-                    <div className="flex justify-between items-baseline gap-2">
-                      <div className="font-bold text-[length:var(--font-size-body)] text-slate-900">{item.title}</div>
-                      {item.years && (
-                        <div className="text-[length:var(--font-size-meta)] text-slate-500 font-medium whitespace-nowrap">
-                          {item.years}
+              {sectionType === "text" ? (
+                <p className="text-[length:var(--font-size-body)] text-slate-700 leading-[var(--line-height)] text-left">
+                  {text}
+                </p>
+              ) : sectionType === "stringList" ? (
+                <p className="text-[length:var(--font-size-body)] text-slate-700 leading-[var(--line-height)]">
+                  {strings.join(", ")}
+                </p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: itemGap }}>
+                  {items.map((item, iIdx) => {
+                    const descriptions = Array.isArray(item.description)
+                      ? item.description
+                      : item.description
+                        ? [item.description]
+                        : [];
+                    return (
+                      <div key={item.id ?? iIdx} className="text-left">
+                        <div className="flex flex-wrap justify-between items-baseline gap-x-2 gap-y-0.5">
+                          <div className="min-w-0 flex-1 break-words font-bold text-[length:var(--font-size-body)] text-slate-900">
+                            {item.title}
+                          </div>
+                          {item.years && (
+                            <div className="ml-auto shrink-0 text-right text-[length:var(--font-size-meta)] text-slate-500 font-medium whitespace-nowrap">
+                              {item.years}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                    {item.description && (
-                      <p className="mt-0.5 text-slate-700 text-[length:var(--font-size-body)] leading-[var(--line-height)]">
-                        {Array.isArray(item.description) ? item.description.join(" ") : item.description}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
+                        {(item.subtitle || item.location) && (
+                          <div className="flex justify-between gap-2 text-[length:var(--font-size-meta)] text-slate-500">
+                            {item.subtitle && <span>{item.subtitle}</span>}
+                            {item.location && <span>{item.location}</span>}
+                          </div>
+                        )}
+                        {descriptions.length > 0 && (
+                          <ul className="mt-0.5 list-disc pl-3.5 space-y-0.5 text-slate-700 text-[length:var(--font-size-body)] leading-[var(--line-height)]">
+                            {descriptions.map((description, descriptionIndex) => (
+                              <li
+                                key={descriptionIndex}
+                                className={item.descriptionStyles?.[descriptionIndex] === "plain" ? "list-none" : undefined}
+                              >
+                                {description}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           );
         })}
@@ -496,14 +576,7 @@ export function ResumeBase({
           />
         )}
 
-        <div
-          ref={contentRef}
-          style={{
-            width: "100%",
-            transform: `scale(${fitScale})`,
-            transformOrigin: "top left",
-          }}
-        >
+        <div className="w-full">
         {/* ================= HEADER ================= */}
         {templateId === "latex" ? (
           <header className="text-center pb-2 mb-1.5 border-b border-slate-900" style={{ fontFamily: headerFont }}>
@@ -515,6 +588,20 @@ export function ResumeBase({
             )}
             <div className="mt-1">
               <ContactInfo centered={true} />
+            </div>
+          </header>
+        ) : templateId === "clean" ? (
+          <header className="pb-2 mb-1.5 border-b border-slate-200 text-center" style={{ fontFamily: headerFont }}>
+            <h1 className="text-[length:var(--font-size-header)] font-semibold tracking-tight text-slate-900">
+              {personalInfo.name}
+            </h1>
+            {personalInfo.title && (
+              <p className="text-[length:var(--font-size-body)] text-slate-600 mt-0.5">
+                {personalInfo.title}
+              </p>
+            )}
+            <div className="mt-1">
+              <ContactInfo centered />
             </div>
           </header>
         ) : (
@@ -539,17 +626,20 @@ export function ResumeBase({
 
         {/* ================= BODY ================= */}
         {isTwoColumn ? (
-          // Two-column Layout (66% Main / 34% Sidebar)
-          <div className="grid grid-cols-[1fr_195px] gap-4 items-start">
+          // Keep the main content wider while giving the sidebar room to wrap.
+          <div
+            className="grid items-start gap-4"
+            style={{ gridTemplateColumns: "minmax(0, 1.85fr) minmax(0, 1fr)" }}
+          >
             {/* Left Main Column */}
-            <div>
+            <div className="min-w-0">
               <SummarySection />
               <WorkExperienceSection />
               <ProjectsSection />
             </div>
 
             {/* Right Sidebar Column */}
-            <div className="border-l border-slate-200 pl-3.5 space-y-2">
+            <div className="min-w-0 space-y-2 break-words border-l border-slate-200 pl-3.5 [overflow-wrap:anywhere]">
               <SkillsSection compact={true} />
               <EducationSection />
               <CustomSectionsRenderer />

@@ -103,6 +103,74 @@ def _response_text(response: Any) -> str:
         raise CustomException(e, sys)
 
 
+def _configured_openrouter_keys() -> list[tuple[int, str]]:
+    return [
+        (index, key)
+        for index, key in enumerate(
+            (
+                OPENROUTER_API_KEY_1,
+                OPENROUTER_API_KEY_2,
+                OPENROUTER_API_KEY_3,
+                OPENROUTER_API_KEY_4,
+                OPENROUTER_API_KEY_5,
+                OPENROUTER_API_KEY_6,
+                OPENROUTER_API_KEY_7,
+            ),
+            start=1,
+        )
+        if key
+    ]
+
+
+async def complete(
+    prompt: str,
+    system_prompt: str | None = None,
+    max_tokens: int = 4096,
+) -> str:
+    """Call OpenRouter and return the model response as plain text."""
+    try:
+        if not prompt.strip():
+            raise ValueError("LLM prompt cannot be empty")
+        if max_tokens <= 0:
+            raise ValueError("max_tokens must be greater than zero")
+
+        configured_keys = _configured_openrouter_keys()
+        if not configured_keys:
+            raise RuntimeError("At least one OPENROUTER_API_KEY_1-7 is required")
+
+        messages = []
+        if system_prompt and system_prompt.strip():
+            messages.append(("system", system_prompt.strip()))
+        messages.append(("user", prompt))
+
+        last_error: Exception | None = None
+        for key_number, api_key in configured_keys:
+            try:
+                model = _create_openrouter_model(api_key=api_key, max_tokens=max_tokens)
+                response = await model.ainvoke(messages)
+                result = _response_text(response).strip()
+                if not result:
+                    raise ValueError("OpenRouter returned an empty text response")
+                logger.info(
+                    "OpenRouter produced plain-text completion (key=%d, characters=%d)",
+                    key_number,
+                    len(result),
+                )
+                return result
+            except Exception as error:
+                last_error = error
+                logger.warning(
+                    "OpenRouter plain-text completion failed with configured key %d (%s); "
+                    "trying the next configured key",
+                    key_number,
+                    type(error).__name__,
+                )
+
+        raise RuntimeError("All configured OpenRouter API keys failed") from last_error
+    except Exception as e:
+        raise CustomException(e, sys)
+
+
 def _summarize_json_for_logging(value: Any, key: str = "") -> Any:
     """Keep LLM diagnostics useful without logging personal resume content."""
     try:
@@ -157,22 +225,7 @@ async def complete_json(
             (system_prompt or "").strip()
             + "\n\nReturn only one valid JSON object. Do not use Markdown or explanations."
         ).strip()
-        configured_keys = [
-            (index, key)
-            for index, key in enumerate(
-                (
-                    OPENROUTER_API_KEY_1,
-                    OPENROUTER_API_KEY_2,
-                    OPENROUTER_API_KEY_3,
-                    OPENROUTER_API_KEY_4,
-                    OPENROUTER_API_KEY_5,
-                    OPENROUTER_API_KEY_6,
-                    OPENROUTER_API_KEY_7,
-                ),
-                start=1,
-            )
-            if key
-        ]
+        configured_keys = _configured_openrouter_keys()
         if not configured_keys:
             raise RuntimeError("At least one OPENROUTER_API_KEY_1-7 is required")
 

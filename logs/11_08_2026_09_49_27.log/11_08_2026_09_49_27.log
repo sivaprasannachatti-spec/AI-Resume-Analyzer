@@ -1,0 +1,134 @@
+[ 2026-11-08 09:50:19,843 ] 67 backend.models.database - INFO - Database schema verified: resumes.master_resume_payload is available
+[ 2026-11-08 10:29:02,282 ] 156 backend.controllers.resume_controller - ERROR - Resume upload pipeline failed for user_id=None, file_name=Updated_Resume_v3.pdf
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 149, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3299, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 445, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 1324, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 714, in checkout
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 712, in checkout
+    dbapi_connection = rec.get_connection()
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 877, in get_connection
+    self.__connect()
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 916, in __connect
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 912, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\engine\create.py", line 645, in connect
+    return dialect.connect(*cargs_tup, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 869, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\psycopg\connection.py", line 100, in connect
+    attempts = conninfo_attempts(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\psycopg\_conninfo_attempts.py", line 55, in conninfo_attempts
+    raise last_exc
+psycopg.OperationalError: failed to resolve host 'ep-square-queen-a1a46t2r-pooler.ap-southeast-1.aws.neon.tech': [Errno 11001] getaddrinfo failed
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\backend\controllers\resume_controller.py", line 26, in get_or_create_default_user
+    user = session.exec(select(Users).where(Users.email == "demo@resumeanalyser.ai")).first()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlmodel\orm\session.py", line 80, in exec
+    results = super().execute(
+              ^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2473, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2350, in _execute_internal
+    conn = self._connection_for_bind(bind)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2173, in _connection_for_bind
+    return trans._connection_for_bind(engine, execution_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<sqlalchemy generated _go() wrapper for sqlalchemy.orm.session.SessionTransaction._connection_for_bind>", line 2, in _connection_for_bind
+    return target(fn, self, bind, execution_options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\orm\session.py", line 1203, in _connection_for_bind
+    conn = bind.connect()
+           ^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3275, in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 151, in __init__
+    Connection._handle_dbapi_exception_noconnection(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2432, in _handle_dbapi_exception_noconnection
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 149, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 3299, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 445, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 1324, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 714, in checkout
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 712, in checkout
+    dbapi_connection = rec.get_connection()
+                       ^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 877, in get_connection
+    self.__connect()
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 916, in __connect
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 166, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\pool\base.py", line 912, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\engine\create.py", line 645, in connect
+    return dialect.connect(*cargs_tup, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 869, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\psycopg\connection.py", line 100, in connect
+    attempts = conninfo_attempts(params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\psycopg\_conninfo_attempts.py", line 55, in conninfo_attempts
+    raise last_exc
+sqlalchemy.exc.OperationalError: (psycopg.OperationalError) failed to resolve host 'ep-square-queen-a1a46t2r-pooler.ap-southeast-1.aws.neon.tech': [Errno 11001] getaddrinfo failed
+(Background on this error at: https://sqlalche.me/e/21/e3q8)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\backend\controllers\resume_controller.py", line 54, in process_resume_upload
+    user_id = get_or_create_default_user()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\backend\controllers\resume_controller.py", line 38, in get_or_create_default_user
+    raise CustomException(e, sys)
+src.exception.CustomException: Error occured in python script name [C:\AI Resume Analyser\backend\controllers\resume_controller.py] line number [26] error message[(psycopg.OperationalError) failed to resolve host 'ep-square-queen-a1a46t2r-pooler.ap-southeast-1.aws.neon.tech': [Errno 11001] getaddrinfo failed
+(Background on this error at: https://sqlalche.me/e/21/e3q8)]

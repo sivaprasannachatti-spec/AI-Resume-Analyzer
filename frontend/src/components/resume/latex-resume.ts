@@ -1,4 +1,4 @@
-import { ResumeSchema } from "@/types/resume";
+import { CustomSection, ResumeSchema } from "@/types/resume";
 import { TemplateSettings } from "./template-settings";
 
 function escapeLatex(value: unknown): string {
@@ -15,6 +15,27 @@ function escapeLatex(value: unknown): string {
     "~": "\\textasciitilde{}",
   };
   return String(value ?? "").replace(/[\\{}%$&#_^~]/g, (character) => escapedCharacters[character]);
+}
+
+function normalizeExternalUrl(value: string): string {
+  const trimmed = value.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/\//, "")}`;
+}
+
+function formatSocialLinkLabel(value: string): string {
+  const key = value.toLowerCase().replace(/_url$/, "").replace(/[-_]+/g, " ").trim();
+  const knownLabels: Record<string, string> = {
+    x: "X",
+    dev: "DEV",
+    devto: "DEV",
+    github: "GitHub",
+    linkedin: "LinkedIn",
+    medium: "Medium",
+    stackoverflow: "Stack Overflow",
+    "stack overflow": "Stack Overflow",
+  };
+  return knownLabels[key] ?? key.replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function asTextList(value: unknown): string[] {
@@ -52,6 +73,28 @@ function renderSection(title: string, content: string): string {
   ].join("\n");
 }
 
+function getCustomSectionEntries(
+  sections: ResumeSchema["customSections"],
+): Array<[string, CustomSection]> {
+  if (Array.isArray(sections)) {
+    return sections.map((section, index) => [
+      section.key || `custom_${index + 1}`,
+      section,
+    ]);
+  }
+  return sections && typeof sections === "object"
+    ? Object.entries(sections)
+    : [];
+}
+
+function formatCustomSectionTitle(key: string): string {
+  return key
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export function generateLatexResume(
   resume: ResumeSchema,
   settings: TemplateSettings,
@@ -65,14 +108,31 @@ export function generateLatexResume(
   const certifications = asTextList(additional.certificationsTraining);
   const awards = asTextList(additional.awards);
 
+  const profileLinks = [
+    { label: "LinkedIn", url: personal.linkedin_url },
+    { label: "GitHub", url: personal.github_url },
+    { label: "Twitter / X", url: personal.twitter_url },
+    { label: "Portfolio", url: personal.portfolio_url },
+    ...Object.entries(personal.other_links ?? {}).map(([label, url]) => ({
+      label: formatSocialLinkLabel(label),
+      url,
+    })),
+  ].filter(
+    (link): link is { label: string; url: string } =>
+      typeof link.url === "string" && link.url.trim().length > 0,
+  );
   const contact = [
     personal.email,
     personal.phone,
     personal.location,
-    personal.linkedin_url,
-    personal.github_url,
   ].filter((value): value is string => typeof value === "string" && value.trim().length > 0)
     .map(escapeLatex)
+    .concat(
+      profileLinks.map(
+        ({ label, url }) =>
+          `\\href{${escapeLatex(normalizeExternalUrl(url))}}{${escapeLatex(label)}}`,
+      ),
+    )
     .join(" \\textbar{} ");
 
   const experience = (resume.workExperience ?? []).map((item) => [
@@ -100,10 +160,32 @@ export function generateLatexResume(
   const skills = technicalSkills.length
     ? escapeLatex(technicalSkills.join(" \\textbullet{} "))
     : "";
-  const customSections = (resume.customSections ?? []).map((section) => {
-    const title = section.title ?? section.key?.replaceAll("_", " ") ?? "Additional";
+  const customSections = getCustomSectionEntries(resume.customSections).map(([key, section]) => {
+    const title = section.title
+      ?? section.key?.replaceAll("_", " ")
+      ?? (Array.isArray(resume.customSections) ? "Additional" : formatCustomSectionTitle(key));
+    const sectionType = section.sectionType
+      ?? (section.text !== undefined
+        ? "text"
+        : section.strings
+          ? "stringList"
+          : section.items
+            ? "itemList"
+            : undefined);
+    if (sectionType === "text") {
+      return renderSection(title, escapeLatex(section.text));
+    }
+    if (sectionType === "stringList") {
+      return renderSection(
+        title,
+        escapeLatex((section.strings ?? []).join(" \\textbullet{} ")),
+      );
+    }
     const items = (section.items ?? []).map((item) => [
       `\\resumeEntry{${escapeLatex(item.title)}}{${escapeLatex(item.years)}}`,
+      item.subtitle || item.location
+        ? `\\textit{${escapeLatex([item.subtitle, item.location].filter(Boolean).join(", "))}}`
+        : "",
       Array.isArray(item.description)
         ? renderList(item.description)
         : escapeLatex(item.description),
@@ -135,33 +217,27 @@ export function generateLatexResume(
     "\\usepackage[hidelinks]{hyperref}",
     "\\usepackage{xcolor}",
     "\\usepackage{microtype}",
-    "\\usepackage{adjustbox}",
     `\\geometry{${settings.pageSize === "LETTER" ? "letterpaper" : "a4paper"},margin=36pt}`,
     "\\pagestyle{empty}",
     "\\setlength{\\parindent}{0pt}",
-    "\\setlength{\\parskip}{2pt}",
-    "\\renewcommand{\\baselinestretch}{1.25}",
+    "\\setlength{\\parskip}{0pt}",
     "\\definecolor{resumeheading}{HTML}{1F2937}",
     "\\newcommand{\\resumeSection}[1]{%",
-    "  \\vspace{5pt}\\noindent{\\small\\scshape\\color{resumeheading}#1}\\par",
-    "  \\vspace{1pt}\\hrule\\vspace{3pt}",
+    "  \\vspace{3pt}\\noindent{\\small\\scshape\\color{resumeheading}#1}\\par",
+    "  \\vspace{1pt}\\hrule\\vspace{2pt}",
     "}",
     "\\newcommand{\\resumeEntry}[2]{%",
     "  \\textbf{#1}\\hfill{\\small #2}\\par",
     "}",
     "\\begin{document}",
-    "\\begin{adjustbox}{max totalsize={\\textwidth}{\\textheight}}",
-    "\\begin{minipage}{\\textwidth}",
     "\\fontsize{10pt}{12.5pt}\\selectfont",
     "\\begin{center}",
     `  {\\fontsize{22pt}{25pt}\\selectfont\\scshape ${escapeLatex(personal.name)}}\\\\`,
     personal.title ? `  {\\small ${escapeLatex(personal.title)}}\\\\` : "",
     `  {\\small ${contact}}`,
     "\\end{center}",
-    "\\vspace{-4pt}\\hrule\\vspace{5pt}",
+    "\\vspace{-4pt}\\hrule\\vspace{3pt}",
     ...sections,
-    "\\end{minipage}",
-    "\\end{adjustbox}",
     "\\end{document}",
   ].filter((line) => line !== "").join("\n") + "\n";
 }

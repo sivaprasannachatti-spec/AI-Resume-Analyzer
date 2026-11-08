@@ -36,6 +36,8 @@ export default function Navbar() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/upload", label: "Upload & ATS" },
+    { href: "/resumes", label: "Past resumes" },
+    { href: "/outreach-messages", label: "Outreach messages" },
   ];
 
   return (

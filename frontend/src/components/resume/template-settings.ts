@@ -35,11 +35,11 @@ export interface TemplateSettings {
 }
 
 export const DEFAULT_TEMPLATE_SETTINGS: TemplateSettings = {
-  template: "swiss-single",
+  template: "clean",
   pageSize: "A4",
   margins: { top: 10, bottom: 10, left: 10, right: 10 },
-  spacing: { section: 3, item: 2, lineHeight: 3 },
-  fontSize: { base: 3, headerScale: 3, headerFont: "serif", bodyFont: "sans-serif" },
+  spacing: { section: 3, item: 3, lineHeight: 3 },
+  fontSize: { base: 4, headerScale: 3, headerFont: "sans-serif", bodyFont: "sans-serif" },
   compactMode: false,
   showContactIcons: false,
   accentColor: "blue",
@@ -82,10 +82,10 @@ export function settingsToCssVars(settings: TemplateSettings): React.CSSProperti
     "--item-gap": `calc(${ITEM_SPACING_MAP[settings.spacing.item]} * ${compact})`,
     "--line-height": LINE_HEIGHT_MAP[settings.spacing.lineHeight] * (settings.compactMode ? 0.92 : 1),
     "--font-size-base": `${baseFontSize}px`,
-    "--font-size-body": `${baseFontSize * 0.75}px`,
-    "--font-size-small": `${baseFontSize * 0.68}px`,
-    "--font-size-meta": `${baseFontSize * 0.7}px`,
-    "--font-size-section": `${baseFontSize * 0.75}px`,
+    "--font-size-body": `${baseFontSize * 0.9}px`,
+    "--font-size-small": `${baseFontSize * 0.75}px`,
+    "--font-size-meta": `${baseFontSize * 0.75}px`,
+    "--font-size-section": `${baseFontSize * 0.8}px`,
     "--font-size-header": `${baseFontSize * HEADER_SCALE_MAP[settings.fontSize.headerScale] * 0.7}px`,
     "--header-font": headerFont === "serif" ? "Georgia, serif" : headerFont === "mono" ? "ui-monospace, monospace" : "Arial, sans-serif",
     "--body-font": bodyFont === "serif" ? "Georgia, serif" : bodyFont === "mono" ? "ui-monospace, monospace" : "Arial, sans-serif",
@@ -112,7 +112,7 @@ export const TEMPLATE_SETTINGS: ResumeTemplateSetting[] = [
   { id: "deedy", name: "Deedy", description: "Classic two-column technical CV", category: "ATS", accent: "#475569" },
 ];
 
-export const DEFAULT_TEMPLATE_ID: ResumeTemplateId = "swiss-single";
+export const DEFAULT_TEMPLATE_ID: ResumeTemplateId = "clean";
 
 export function isResumeTemplateId(value: string | undefined): value is ResumeTemplateId {
   return TEMPLATE_SETTINGS.some((template) => template.id === value);

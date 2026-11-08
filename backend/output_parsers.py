@@ -11,6 +11,55 @@ class PersonalInfo(BaseModel):
     linkedin_url: Optional[str] = Field(None, description="The LinkedIn profile URL")
     twitter_url: Optional[str] = Field(None, description="The Twitter profile URL")
     portfolio_url: Optional[str] = Field(None, description="Personal website or portfolio URL")
+    other_links: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Other social media, professional profile, or website URLs keyed by platform name",
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalize_social_links(cls, value: Any) -> Any:
+        if not isinstance(value, dict):
+            return value
+
+        normalized = dict(value)
+        aliases = {
+            "github_url": ("github",),
+            "linkedin_url": ("linkedin",),
+            "twitter_url": ("twitter", "x", "x_url"),
+            "portfolio_url": ("website", "website_url", "portfolio"),
+        }
+        known_social_keys = {
+            "github_url", "github", "linkedin_url", "linkedin",
+            "twitter_url", "twitter", "x", "x_url",
+            "portfolio_url", "website", "website_url", "portfolio",
+        }
+
+        for field_name, field_aliases in aliases.items():
+            if not normalized.get(field_name):
+                for alias in field_aliases:
+                    alias_value = normalized.get(alias)
+                    if isinstance(alias_value, str) and alias_value.strip():
+                        normalized[field_name] = alias_value.strip()
+                        break
+
+        links = normalized.get("other_links") or normalized.get("social_links") or {}
+        other_links = dict(links) if isinstance(links, dict) else {}
+        for key, link in normalized.items():
+            normalized_key = key.casefold().replace("-", "_")
+            if (
+                normalized_key.endswith("_url")
+                and normalized_key not in known_social_keys
+                and isinstance(link, str)
+                and link.strip()
+            ):
+                label = key[:-4].replace("_", " ").replace("-", " ").strip().title()
+                if label:
+                    other_links.setdefault(label, link.strip())
+
+        normalized["other_links"] = other_links
+        normalized.pop("social_links", None)
+        return normalized
 
 class Projects(BaseModel):
     id: Optional[int] = Field(None, description="Unique identifier for the project")
@@ -44,17 +93,24 @@ class AdditionalInfo(BaseModel):
     awards: Optional[List[str]] = Field(default_factory=list, description="Awards present in resume")
 
 class CustomSectionItem(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
     id: Optional[int] = None
     title: Optional[str] = None
+    subtitle: Optional[str] = None
+    location: Optional[str] = None
     years: Optional[str] = None
     description: Optional[Union[str, List[str]]] = None
     descriptionStyles: Optional[List[str]] = None
 
 class CustomSection(BaseModel):
     model_config = ConfigDict(extra="allow")
+    sectionType: Optional[Literal["personalInfo", "text", "itemList", "stringList"]] = None
     type: Optional[str] = None
     key: Optional[str] = None
     title: Optional[str] = None
+    text: Optional[str] = None
+    strings: Optional[List[str]] = None
     items: Optional[List[Union[CustomSectionItem, Dict[str, Any]]]] = Field(default_factory=list)
 
 class ResumeSchema(BaseModel):
@@ -65,7 +121,7 @@ class ResumeSchema(BaseModel):
     education: List[Education] = Field(default_factory=list, description="List of educational qualifications")
     projects: List[Projects] = Field(default_factory=list, description="List of projects")
     additional: Optional[Union[AdditionalInfo, Dict[str, Any], List[Any]]] = Field(default_factory=dict, description="Additional information such as skills, languages, certifications, and awards")
-    customSections: Optional[List[Union[CustomSection, Dict[str, Any]]]] = Field(default_factory=list, description="Custom sections such as Academic Positions, Leadership, Extracurriculars")
+    customSections: Optional[Union[Dict[str, Any], List[Union[CustomSection, Dict[str, Any]]]]] = Field(default_factory=dict, description="Keyed custom sections such as publications, volunteer_work, and hobbies")
 
 class JDSchema(BaseModel):
     company: str = Field(..., description="The name of the company offering the job")

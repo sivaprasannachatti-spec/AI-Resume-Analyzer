@@ -12,19 +12,19 @@ logger = getLogger(__name__)
 
 
 class TemplateSettings(BaseModel):
-    template: str = "swiss-single"
+    template: str = "clean"
     pageSize: Literal["A4", "LETTER"] = "A4"
     margins: Dict[str, float] = Field(
         default_factory=lambda: {"top": 10, "bottom": 10, "left": 10, "right": 10}
     )
     spacing: Dict[str, int] = Field(
-        default_factory=lambda: {"section": 3, "item": 2, "lineHeight": 3}
+        default_factory=lambda: {"section": 3, "item": 3, "lineHeight": 3}
     )
     fontSize: Dict[str, object] = Field(
         default_factory=lambda: {
-            "base": 3,
+            "base": 4,
             "headerScale": 3,
-            "headerFont": "serif",
+            "headerFont": "sans-serif",
             "bodyFont": "sans-serif",
         }
     )
@@ -129,5 +129,23 @@ try:
 
         # Relationships
         resume: Optional[Resumes] = Relationship(back_populates="tailored_resumes")
+        outreach_messages: List["OutReachMessages"] = Relationship(
+            back_populates="tailored_resume"
+        )
+
+    class OutReachMessages(SQLModel, table=True):
+        __tablename__ = "outreach_messages"
+        outreach_id: str = Field(default_factory=_uuid, primary_key=True)
+        tailored_resume_id: str = Field(
+            ...,
+            foreign_key="tailored_resumes.tailored_resume_id",
+            description="The ID of the tailored resume associated with this outreach message",
+        )
+        message: str = Field(..., description="The outreach message content")
+        created_at: datetime = Field(default_factory=_now, description="The timestamp when the outreach message was created")
+        updated_at: datetime = Field(default_factory=_now, description="The timestamp when the outreach message was last updated")
+
+        # Relationships
+        tailored_resume: Optional[TailoredResume] = Relationship(back_populates="outreach_messages")
 except Exception as e:
     raise CustomException(e, sys)

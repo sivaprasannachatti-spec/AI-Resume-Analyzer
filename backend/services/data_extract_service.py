@@ -16,7 +16,7 @@ def extract_file_bytes(file_url: str) -> bytes:
     except Exception as e:
         raise CustomException(e, sys)
 
-def extract_markdown_from_bytes(file_bytes: bytes, filename: str = "resume.pdf") -> str:
+async def extract_markdown_from_bytes(file_bytes: bytes, filename: str = "resume.pdf") -> str:
     """Extracts markdown layout directly from in-memory PDF bytes using Docling."""
     try:
         file_stream = io.BytesIO(file_bytes)

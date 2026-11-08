@@ -13,7 +13,14 @@ import ResumeDropzone from "@/components/ResumeDropzone";
 import { apiFetch, getApiBase } from "@/lib/api";
 import ResumeTemplateGallery from "@/components/ResumeTemplateGallery";
 import { useRouter } from "next/navigation";
-import { DEFAULT_TEMPLATE_ID, DEFAULT_TEMPLATE_SETTINGS, ResumeTemplateId } from "@/components/resume/template-settings";
+import {
+  AccentColor,
+  DEFAULT_TEMPLATE_ID,
+  DEFAULT_TEMPLATE_SETTINGS,
+  PageSize,
+  SpacingLevel,
+  TemplateSettings,
+} from "@/components/resume/template-settings";
 
 export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -22,8 +29,10 @@ export default function UploadPage() {
   const [processingStatus, setProcessingStatus] = useState<string>("");
   const [processingStage, setProcessingStage] = useState<"upload" | "tailor" | "prepare" | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [, setTailoringResult] = useState<any>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplateId>(DEFAULT_TEMPLATE_ID);
+  const [templateSettings, setTemplateSettings] = useState<TemplateSettings>({
+    ...DEFAULT_TEMPLATE_SETTINGS,
+    template: DEFAULT_TEMPLATE_ID,
+  });
   const router = useRouter();
 
   const sampleJDs = [
@@ -60,6 +69,13 @@ export default function UploadPage() {
       setProcessingStatus("Uploading your PDF and extracting its structure...");
       const formData = new FormData();
       formData.append("file", selectedFile);
+      const storedUser = localStorage.getItem("resumatch_user");
+      if (storedUser) {
+        const user = JSON.parse(storedUser) as { user_id?: string };
+        if (user.user_id) {
+          formData.append("user_id", user.user_id);
+        }
+      }
 
       const API_BASE = getApiBase();
       const uploadRes = await fetch(`${API_BASE}/api/resume/upload`, {
@@ -89,18 +105,21 @@ export default function UploadPage() {
       setProcessingStatus("Preparing your content review and formatted preview...");
       const resultWithTemplate = {
         ...tailoringData,
-        template: selectedTemplate,
-        templateSettings: { ...DEFAULT_TEMPLATE_SETTINGS, template: selectedTemplate },
+        template: templateSettings.template,
+        templateSettings,
       };
-      setTailoringResult(resultWithTemplate);
       sessionStorage.setItem("resumatch_tailoring_preview", JSON.stringify(resultWithTemplate));
       setProcessingStatus(`Tailored resume ready for resume ${resumeId}.`);
       setIsProcessing(false);
       setProcessingStage(null);
       router.push("/tailored-resume");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMsg(err.message || "An error occurred while generating tailored resume.");
+      setErrorMsg(
+        err instanceof Error
+          ? err.message
+          : "An error occurred while generating tailored resume.",
+      );
       setIsProcessing(false);
       setProcessingStatus("");
       setProcessingStage(null);
@@ -140,15 +159,144 @@ export default function UploadPage() {
 
         <div className="space-y-8">
           <ResumeTemplateGallery
-            selectedTemplate={selectedTemplate}
-            onSelect={setSelectedTemplate}
+            selectedTemplate={templateSettings.template}
+            onSelect={(template) =>
+              setTemplateSettings((current) => ({ ...current, template }))
+            }
           />
+          <section
+            aria-labelledby="formatting-heading"
+            className="space-y-5 rounded-3xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-5 shadow-sm sm:p-6"
+          >
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--primary-accent)]">
+                Step 02
+              </p>
+              <h2 id="formatting-heading" className="mt-1 text-lg font-bold text-[var(--text-heading)]">
+                Customize your page
+              </h2>
+              <p className="mt-1 text-xs text-[var(--text-muted)]">
+                Choose an accent, page size, and spacing. You can adjust these again in the preview.
+              </p>
+            </div>
+
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-semibold text-[var(--text-body)]">Accent color</legend>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { value: "blue", label: "Blue", color: "#1d4ed8" },
+                  { value: "green", label: "Green", color: "#15803d" },
+                  { value: "orange", label: "Orange", color: "#ea580c" },
+                  { value: "red", label: "Red", color: "#dc2626" },
+                ] satisfies { value: AccentColor; label: string; color: string }[]).map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={templateSettings.accentColor === option.value}
+                    onClick={() =>
+                      setTemplateSettings((current) => ({
+                        ...current,
+                        accentColor: option.value,
+                      }))
+                    }
+                    className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary-accent)] ${
+                      templateSettings.accentColor === option.value
+                        ? "border-[var(--primary-accent)] bg-[var(--bg-elevated)] text-[var(--text-heading)]"
+                        : "border-[var(--border-subtle)] text-[var(--text-body)] hover:border-[var(--primary-accent)]"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="h-3.5 w-3.5 rounded-full ring-1 ring-black/10"
+                      style={{ backgroundColor: option.color }}
+                    />
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-semibold text-[var(--text-body)]">Page size</legend>
+              <div className="grid max-w-md grid-cols-2 gap-3">
+                {([
+                  { value: "A4", label: "A4", detail: "210 x 297 mm" },
+                  { value: "LETTER", label: "US Letter", detail: "8.5 x 11 in" },
+                ] satisfies { value: PageSize; label: string; detail: string }[]).map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={templateSettings.pageSize === option.value}
+                    onClick={() =>
+                      setTemplateSettings((current) => ({
+                        ...current,
+                        pageSize: option.value,
+                      }))
+                    }
+                    className={`rounded-xl border px-3 py-2.5 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary-accent)] ${
+                      templateSettings.pageSize === option.value
+                        ? "border-[var(--primary-accent)] bg-[var(--primary-accent)] text-white"
+                        : "border-[var(--border-subtle)] bg-[var(--bg-elevated)] text-[var(--text-body)] hover:border-[var(--primary-accent)]"
+                    }`}
+                  >
+                    <span className="block text-xs font-bold">{option.label}</span>
+                    <span className={`mt-0.5 block text-[10px] ${
+                      templateSettings.pageSize === option.value
+                        ? "text-white/80"
+                        : "text-[var(--text-muted)]"
+                    }`}>
+                      {option.detail}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              {([
+                { key: "section", label: "Section spacing" },
+                { key: "item", label: "Entry spacing" },
+                { key: "lineHeight", label: "Line spacing" },
+              ] satisfies { key: keyof TemplateSettings["spacing"]; label: string }[]).map((control) => (
+                <label key={control.key} className="block text-xs font-semibold text-[var(--text-body)]">
+                  <span className="flex items-center justify-between gap-2">
+                    {control.label}
+                    <span className="font-normal text-[var(--text-muted)]">
+                      {templateSettings.spacing[control.key]} / 5
+                    </span>
+                  </span>
+                  <input
+                    type="range"
+                    min={1}
+                    max={5}
+                    step={1}
+                    value={templateSettings.spacing[control.key]}
+                    onChange={(event) =>
+                      setTemplateSettings((current) => ({
+                        ...current,
+                        spacing: {
+                          ...current.spacing,
+                          [control.key]: Number(event.target.value) as SpacingLevel,
+                        },
+                      }))
+                    }
+                    className="mt-2 w-full accent-indigo-600"
+                    aria-label={control.label}
+                  />
+                  <span className="flex justify-between text-[10px] font-normal text-[var(--text-muted)]">
+                    <span>Tight</span>
+                    <span>Relaxed</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </section>
           <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-[var(--primary-gradient)] text-xs font-bold text-white">
-                  2
+                  3
                 </span>
                 <h2 className="font-bold text-base text-slate-900 dark:text-white">
                   Upload PDF Resume
@@ -172,7 +320,7 @@ export default function UploadPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-teal-600 text-xs font-bold text-white">
-                  3
+                  4
                 </span>
                 <h2 className="font-bold text-base text-slate-900 dark:text-white">
                   Target Job Description

@@ -1,6 +1,7 @@
-import asyncio
-import io
+import logging
 import sys
+import time
+import asyncio
 from typing import Optional, Dict, Any
 from fastapi import UploadFile, HTTPException
 from sqlmodel import Session, select
@@ -8,11 +9,12 @@ from sqlmodel import Session, select
 from src.exception import CustomException
 from backend.models.database import engine
 from backend.models.schemas import Users, Resumes, TailoredResume, ResumeAnalysis
-from backend.services.upload_file_service import sync_file_upload
 from backend.services.data_extract_service import extract_markdown_from_bytes
 from backend.services.llm_services import parse_resume_json
 from backend.services.improver import extract_job_keywords
 from backend.services.ats_service import evaluate_and_save_ats_analysis, compute_ats_score
+
+logger = logging.getLogger(__name__)
 
 
 def get_or_create_default_user() -> str:
@@ -39,69 +41,87 @@ async def process_resume_upload(
 ) -> Dict[str, Any]:
     """
     Handles resume upload:
-    1. Uploads PDF to Backblaze B2.
-    2. Extracts Markdown text via Docling.
-    3. Normalizes into ResumeSchema via LLM.
-    4. Persists the uploaded resume and master resume payload.
+    1. Extracts Markdown directly from uploaded PDF bytes via Docling.
+    2. Normalizes into ResumeSchema via LLM.
+    3. Persists the parsed resume payload.
     """
+    upload_started_at = time.perf_counter()
     try:
         if not user_id:
             user_id = get_or_create_default_user()
 
         file_name = file.filename or "resume.pdf"
         file_bytes = await file.read()
-
-        # 1. Upload the PDF to Backblaze B2; continue with in-memory processing
-        # if the storage service is unavailable.
-        b2_file_url = (
-            f"https://s3.us-west-002.backblazeb2.com/"
-            f"AI-Resume-Analyser/{file_name}"
+        logger.info(
+            "Resume upload request received (user_id=%s, file_name=%s, file_size_bytes=%d)",
+            user_id,
+            file_name,
+            len(file_bytes),
         )
-        try:
-            file_obj = io.BytesIO(file_bytes)
-            uploaded_url = sync_file_upload(file_obj=file_obj, file_name=file_name)
-            if uploaded_url:
-                b2_file_url = uploaded_url
-        except Exception as b2_err:
-            print(
-                "[Warning] B2 upload encountered an issue, "
-                f"proceeding with in-memory pipeline: {b2_err}"
-            )
 
-        # 2. Extract directly from the bytes received by the API, avoiding a
-        # second network request to download the uploaded object.
+        # Extract directly from the received bytes without uploading the PDF.
+        logger.info(
+            "Skipping object storage upload; extracting %s directly from memory",
+            file_name,
+        )
+        extraction_started_at = time.perf_counter()
         try:
-            markdown_text = await asyncio.to_thread(
-                extract_markdown_from_bytes,
-                file_bytes,
+            markdown_text = await extract_markdown_from_bytes(file_bytes, filename=file_name)
+            logger.info(
+                "Docling extraction completed for %s in %.2f seconds",
                 file_name,
+                time.perf_counter() - extraction_started_at,
             )
         except Exception as doc_err:
-            print(f"[Warning] Docling extraction fallback: {doc_err}")
+            logger.warning(
+                "Docling extraction failed for %s; using raw bytes fallback. Error=%s",
+                file_name,
+                doc_err,
+                exc_info=True,
+            )
             markdown_text = file_bytes.decode("utf-8", errors="ignore")
 
-        # 3. Normalize into structured ResumeSchema via OpenRouter LLM
+        # Normalize into structured ResumeSchema via OpenRouter LLM
+        llm_started_at = time.perf_counter()
         normalized_resume = await parse_resume_json(markdown_text)
+        logger.info(
+            "Resume parsing completed for %s in %.2f seconds",
+            file_name,
+            time.perf_counter() - llm_started_at,
+        )
 
-        # 4. Save the master resume after parsing.
+        # Save the parsed resume payload. No source PDF URL is available because
+        # source files are not uploaded to object storage.
         with Session(engine) as session:
             resume_record = Resumes(
                 user_id=user_id,
-                resume_url=b2_file_url,
+                resume_url="",
                 master_resume_payload=normalized_resume,
             )
             session.add(resume_record)
             session.commit()
             session.refresh(resume_record)
 
-            return {
-                "resume_id": resume_record.resume_id,
-                "resume_url": b2_file_url,
-                "file_name": file_name,
-                "master_resume_payload": normalized_resume,
-            }
+        logger.info(
+            "Resume upload pipeline completed for %s (user_id=%s, total_duration=%.2f seconds)",
+            file_name,
+            user_id,
+            time.perf_counter() - upload_started_at,
+        )
+
+        return {
+            "resume_id": resume_record.resume_id,
+            "resume_url": resume_record.resume_url,
+            "file_name": file_name,
+            "master_resume_payload": normalized_resume,
+        }
 
     except Exception as e:
+        logger.exception(
+            "Resume upload pipeline failed for user_id=%s, file_name=%s",
+            user_id,
+            file.filename or "resume.pdf",
+        )
         raise CustomException(e, sys)
 
 
@@ -210,5 +230,55 @@ def get_resume_details(resume_id: str) -> Dict[str, Any]:
 
     except HTTPException:
         raise
+    except Exception as e:
+        raise CustomException(e, sys)
+
+
+def get_resume_history(user_id: Optional[str] = None) -> Dict[str, Any]:
+    """List a user's uploaded resumes and their saved tailored-resume records."""
+    try:
+        if not user_id:
+            user_id = get_or_create_default_user()
+
+        with Session(engine) as session:
+            resumes = session.exec(
+                select(Resumes)
+                .where(Resumes.user_id == user_id)
+                .order_by(Resumes.uploaded_at.desc())
+            ).all()
+            if not resumes:
+                return {"resumes": []}
+
+            resume_ids = [resume.resume_id for resume in resumes]
+            tailored_resumes = session.exec(
+                select(TailoredResume).where(
+                    TailoredResume.resume_id.in_(resume_ids)
+                )
+            ).all()
+            tailored_by_resume_id = {
+                tailored.resume_id: tailored for tailored in tailored_resumes
+            }
+
+            history = []
+            for resume in resumes:
+                tailored = tailored_by_resume_id.get(resume.resume_id)
+                personal_info = (resume.master_resume_payload or {}).get(
+                    "personalInfo", {}
+                )
+                history.append({
+                    "resume_id": resume.resume_id,
+                    "candidate_name": personal_info.get("name", "Resume"),
+                    "resume_url": resume.resume_url,
+                    "uploaded_at": resume.uploaded_at,
+                    "tailored_resume_id": (
+                        tailored.tailored_resume_id if tailored else None
+                    ),
+                    "tailored_updated_at": (
+                        tailored.updated_at if tailored else None
+                    ),
+                    "tailored_file_url": tailored.file_url if tailored else None,
+                })
+
+            return {"resumes": history}
     except Exception as e:
         raise CustomException(e, sys)

@@ -1,11 +1,12 @@
 from typing import Optional
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, Query
 from pydantic import BaseModel
 
 from backend.controllers.resume_controller import (
     process_resume_upload,
     analyze_resume_against_jd,
-    get_resume_details
+    get_resume_details,
+    get_resume_history,
 )
 
 router = APIRouter(prefix="/api/resume", tags=["Resume"])
@@ -32,6 +33,14 @@ async def analyze_resume(request: AnalyzeRequest):
         resume_id=request.resume_id,
         jd_text=request.jd_text,
     )
+
+
+@router.get("/history")
+async def get_resume_history_endpoint(
+    user_id: Optional[str] = Query(default=None),
+):
+    """List uploaded resumes for the given user (or the demo user)."""
+    return get_resume_history(user_id=user_id)
 
 
 @router.get("/{resume_id}")

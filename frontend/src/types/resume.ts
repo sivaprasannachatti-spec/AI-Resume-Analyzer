@@ -6,6 +6,9 @@ export interface PersonalInfo {
   location?: string | null;
   github_url?: string | null;
   linkedin_url?: string | null;
+  twitter_url?: string | null;
+  portfolio_url?: string | null;
+  other_links?: Record<string, string>;
 }
 
 export interface Project {
@@ -46,15 +49,20 @@ export interface AdditionalInfo {
 export interface CustomSectionItem {
   id?: number;
   title?: string;
+  subtitle?: string;
+  location?: string;
   years?: string;
   description?: string | string[];
-  descriptionStyles?: string[];
+  descriptionStyles?: ("bullet" | "plain")[];
 }
 
 export interface CustomSection {
+  sectionType?: "personalInfo" | "text" | "itemList" | "stringList";
   type?: string;
   key?: string;
   title?: string;
+  text?: string;
+  strings?: string[];
   items?: CustomSectionItem[];
   [key: string]: any;
 }
@@ -66,7 +74,7 @@ export interface ResumeSchema {
   workExperience: WorkExperience[];
   education: Education[];
   additional?: AdditionalInfo | AdditionalInfo[] | Record<string, any>;
-  customSections?: CustomSection[];
+  customSections?: CustomSection[] | Record<string, CustomSection>;
   skills?: string[] | Record<string, string[] | string>;
   [key: string]: any;
 }

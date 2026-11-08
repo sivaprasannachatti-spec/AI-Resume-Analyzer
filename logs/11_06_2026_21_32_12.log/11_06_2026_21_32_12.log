@@ -1,0 +1,155 @@
+[ 2026-11-06 21:32:30,518 ] 67 backend.models.database - INFO - Database schema verified: resumes.master_resume_payload is available
+[ 2026-11-06 21:37:28,250 ] 70 backend.services.upload_file_service - INFO - Starting object storage upload (endpoint=s3.us-east-005.backblazeb2.com, bucket=AI-Resume-Analyser, content_type=application/pdf)
+[ 2026-11-06 21:38:42,348 ] 104 backend.services.upload_file_service - ERROR - Storage client/network failure during upload (endpoint=s3.us-east-005.backblazeb2.com, bucket=AI-Resume-Analyser, duration_seconds=74.10, error_type=ConnectionClosedError)
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 499, in _make_request
+    conn.request(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 96, in request
+    rval = super().request(method, url, body, headers, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connection.py", line 581, in request
+    self.send(chunk)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 223, in send
+    return super().send(str)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\http\client.py", line 1077, in send
+    self.sock.sendall(data)
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1210, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1179, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+ConnectionAbortedError: [Errno 10053] An established connection was aborted by the software in your host machine
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\httpsession.py", line 509, in send
+    urllib_response = conn.urlopen(
+                      ^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 847, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\util\retry.py", line 485, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\util\util.py", line 38, in reraise
+    raise value.with_traceback(tb)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 793, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connectionpool.py", line 499, in _make_request
+    conn.request(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 96, in request
+    rval = super().request(method, url, body, headers, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\urllib3\connection.py", line 581, in request
+    self.send(chunk)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\awsrequest.py", line 223, in send
+    return super().send(str)
+           ^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\http\client.py", line 1077, in send
+    self.sock.sendall(data)
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1210, in sendall
+    v = self.send(byte_view[count:])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shiva\AppData\Roaming\uv\python\cpython-3.12-windows-x86_64-none\Lib\ssl.py", line 1179, in send
+    return self._sslobj.write(data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.ProtocolError: ('Connection aborted.', ConnectionAbortedError(10053, 'An established connection was aborted by the software in your host machine'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\AI Resume Analyser\backend\services\upload_file_service.py", line 78, in sync_file_upload
+    client.upload_fileobj(
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\boto3\s3\inject.py", line 678, in upload_fileobj
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\futures.py", line 111, in result
+    return self._coordinator.result()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\futures.py", line 287, in result
+    raise self._exception
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\tasks.py", line 142, in __call__
+    return self._execute_main(kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\tasks.py", line 165, in _execute_main
+    return_value = self._main(**kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\s3transfer\upload.py", line 796, in _main
+    client.put_object(Bucket=bucket, Key=key, Body=body, **extra_args)
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 1076, in _make_api_call
+    http, parsed_response = self._make_request(
+                            ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\client.py", line 1100, in _make_request
+    return self._endpoint.make_request(operation_model, request_dict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 119, in make_request
+    return self._send_request(request_dict, operation_model)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 231, in _send_request
+    raise exception
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 281, in _do_get_response
+    http_response = self._send(request)
+                    ^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\endpoint.py", line 385, in _send
+    return self.http_session.send(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\AI Resume Analyser\.venv\Lib\site-packages\botocore\httpsession.py", line 550, in send
+    raise ConnectionClosedError(
+botocore.exceptions.ConnectionClosedError: Connection was closed before we received a valid response from endpoint URL: "https://s3.us-east-005.backblazeb2.com/AI-Resume-Analyser/Updated_Resume_v3.pdf".
+[ 2026-11-06 21:38:42,663 ] 901 docling.datamodel.document - INFO - detected formats: [<InputFormat.PDF: 'pdf'>]
+[ 2026-11-06 21:38:46,462 ] 890 docling.document_converter - INFO - Going to convert document batch...
+[ 2026-11-06 21:38:46,462 ] 937 docling.document_converter - INFO - Initializing pipeline for StandardPdfPipeline with options hash cf25ea511a2742c54b26ebb546b35217
+[ 2026-11-06 21:38:46,555 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-06 21:38:46,577 ] 31 docling.models.factories - INFO - Registered picture descriptions: ['picture_description_vlm_engine', 'vlm', 'api']
+[ 2026-11-06 21:38:46,615 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-06 21:38:46,661 ] 21 docling.models.factories - INFO - Registered ocr engines: ['auto', 'easyocr', 'kserve_v2_ocr', 'nemotron-ocr', 'ocrmac', 'rapidocr', 'tesserocr', 'tesseract']
+[ 2026-11-06 21:38:46,662 ] 138 docling.models.stages.ocr.auto_ocr_model - INFO - rapidocr cannot be used because onnxruntime is not installed.
+[ 2026-11-06 21:38:46,662 ] 167 docling.models.stages.ocr.auto_ocr_model - INFO - easyocr cannot be used because it is not installed.
+[ 2026-11-06 21:38:47,577 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-06 21:38:47,608 ] 190 docling.models.stages.ocr.auto_ocr_model - INFO - Auto OCR model selected rapidocr with torch.
+[ 2026-11-06 21:38:47,626 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-06 21:38:47,629 ] 39 docling.models.factories - INFO - Registered layout engines: ['layout_object_detection', 'docling_layout_default', 'docling_experimental_table_crops_layout']
+[ 2026-11-06 21:38:51,971 ] 124 docling.models.inference_engines.object_detection.transformers_engine - INFO - Initializing Transformers object-detection engine
+[ 2026-11-06 21:38:51,972 ] 57 docling.models.inference_engines.common.hf_vision_base - INFO - Downloading object-detection model from HuggingFace: docling-project/docling-layout-heron@main
+[ 2026-11-06 21:38:51,972 ] 114 docling.models.utils.hf_model_download - INFO - Fetching model docling-project/docling-layout-heron (revision: main)...
+[ 2026-11-06 21:38:52,254 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/agent-harnesses "HTTP/1.1 200 OK"
+[ 2026-11-06 21:38:52,478 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-layout-heron/revision/main "HTTP/1.1 200 OK"
+[ 2026-11-06 21:38:52,488 ] 125 docling.models.utils.hf_model_download - INFO - Model docling-project/docling-layout-heron already cached at C:\Users\shiva\.cache\huggingface\hub\models--docling-project--docling-layout-heron\snapshots\8f39ad3c0b4c58e9c2d2c84a38465abf757272d8
+[ 2026-11-06 21:38:52,488 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-06 21:38:56,916 ] 198 docling.models.inference_engines.object_detection.transformers_engine - INFO - Transformers engine ready (device=cpu, dtype=torch.float32)
+[ 2026-11-06 21:38:56,941 ] 124 docling.models.factories.base_factory - INFO - Loading plugin 'docling_defaults'
+[ 2026-11-06 21:38:56,951 ] 49 docling.models.factories - INFO - Registered table structure engines: ['docling_tableformer', 'docling_tableformer_v2', 'granite_vision_table']
+[ 2026-11-06 21:38:56,951 ] 114 docling.models.utils.hf_model_download - INFO - Fetching model docling-project/docling-models (revision: v2.3.0)...
+[ 2026-11-06 21:38:57,173 ] 1025 httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/docling-project/docling-models/revision/v2.3.0 "HTTP/1.1 200 OK"
+[ 2026-11-06 21:38:57,191 ] 125 docling.models.utils.hf_model_download - INFO - Model docling-project/docling-models already cached at C:\Users\shiva\.cache\huggingface\hub\models--docling-project--docling-models\snapshots\fc0f2d45e2218ea24bce5045f58a389aed16dc23
+[ 2026-11-06 21:38:57,239 ] 136 docling.utils.accelerator_utils - INFO - Accelerator device: 'cpu'
+[ 2026-11-06 21:38:57,887 ] 91 docling.pipeline.base_pipeline - INFO - Processing document Updated_Resume_v3.pdf
+[ 2026-11-06 21:38:59,438 ] 916 docling.document_converter - INFO - Finished converting document Updated_Resume_v3.pdf in 16.78 sec.
+[ 2026-11-06 21:39:00,044 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 402 Payment Required"
+[ 2026-11-06 21:39:00,045 ] 202 backend.services.llm_services - WARNING - OpenRouter request failed with configured key 1 (APIStatusError); trying the next configured key
+[ 2026-11-06 21:39:00,414 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 402 Payment Required"
+[ 2026-11-06 21:39:00,415 ] 202 backend.services.llm_services - WARNING - OpenRouter request failed with configured key 2 (APIStatusError); trying the next configured key
+[ 2026-11-06 21:39:03,222 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+[ 2026-11-06 21:39:07,509 ] 214 backend.services.llm_services - INFO - OpenRouter produced resume JSON on attempt 1/3: {"personalInfo": {"name": "[REDACTED]", "title": "Aspiring AI Engineer and Generative AI Developer", "email": "[REDACTED]", "phone": "[REDACTED]", "location": "[REDACTED]", "website": "[REDACTED]", "linkedin": "[REDACTED]", "github": "[REDACTED]"}, "summary": "Aspiring AI Engineer and Generative AI Developer with a Python-focused skill set for building LLM-powered applications and RAG (Retrieval-Augmented Generation) pipelines over vector databases. Comfortable using LangChain and LangGraph to bu... [truncated]", "workExperience": [{"id": 1, "title": "AI/ML Intern", "company": "AskFirst", "location": "[REDACTED]", "years": "Jun 2026 - Jul 2026", "responsibilities": ["Engineered embedding-based retrieval pipelines for a healthcare RAG system over a vector database, improving retrieval relevance for domain-specific queries.", "Optimized LLM prompt formatting by restructuring raw-string context into structured MD/XML/ YAML, improving prompt parsing and response consistency.", "Developed a domain-specific healthcare chatbot with a custom deterministic orchestrator for query routing, including an escalation flow to doctor-consultation booking."], "descriptionStyles": ["bullet", "bullet", "bullet"]}], "education": [{"id": 1, "institution": "Neil Gogte Institute of Technology", "degree": "B.E. in Computer Science Engineering", "years": "2023 - 2027", "description": "CGPA: 8.2"}, {"id": 2, "institution": "Sri Chaitanya Junior College", "degree": "TS Intermediate (Class XII)", "years": "2021 - 2023", "description": "Aggregate: 91%"}, {"id": 3, "institution": "Bhashyam High School", "degree": "TS SSC (Class X)", "years": "2019 - 2021", "description": "CGPA: 10"}], "projects": [{"id": 1, "project_name": "AI Resume Analyzer", "project_years": null, "project_description": ["Built a full-stack application that turns uploaded resumes into job-specific versions, helping users assess and improve their alignment with job descriptions.", "Implemented PDF text extraction and structured resume parsing with Docling and OpenRouter, then developed a tailoring workflow that validates proposed edits and preserves candidate details.", "Kept ATS comparisons consistent by scoring original and tailored resumes against the same job description, and refreshing the tailored score after users confirm or save edits.", "Delivered customizable resume templates with browser-based PDF printing and downloadable LaTeX source."], "descriptionStyles": ["bullet", "bullet", "bullet", "bullet"]}], "additional": {"technicalSkills": ["Python", "Java", "LangChain", "Pydantic", "LangGraph", "FastAPI", "MySQL", "Vector Databases"], "languages": [], "certificationsTraining": [], "awards": []}, "customSections": {"academic_positions_and_leadership": {"sectionType": "itemList", "items": [{"id": 1, "title": "Class Representative", "subtitle": null, "years": "Oct 2024 - Jul 2025", "description": ["Served as primary student-faculty liaison; participated in a college Hackathon and hosted events as a Public Speaker."], "descriptionStyles": ["bullet"]}, {"id": 2, "title": "Literary Club Representative", "subtitle": null, "years": "Sep 2023 - Jul 2025", "description": ["Represented the Literary Club by promoting creative writing, public speaking, and reading culture among students, and supporting the planning and hosting of club events and activities."], "descriptionStyles": ["bullet"]}]}}}
+[ 2026-11-06 21:39:11,220 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+[ 2026-11-06 21:39:12,670 ] 214 backend.services.llm_services - INFO - OpenRouter produced keywords JSON on attempt 1/3: {"company": "iion", "role": "Engineering Intern", "required_skills": ["Python", "JSON parsing", "REST APIs", "Prompt Engineering", "LLM basics"], "preferred_skills": ["Anthropic API", "OpenAI API", "LangChain", "LlamaIndex", "CrewAI", "Langfuse", "LangSmith", "SQL", "Git", "Model Context Protocol (MCP)"], "experience_requirements": ["Final year student or recent graduate"], "education_requirements": ["B.Tech./B.E. (or equivalent) degree in Computer Science, Data Science, Artificial Intelligence, Machine Learning or related fields"], "key_responsibilities": ["Assist in building multi-step AI Agents", "Write and test API Connectors", "Draft system prompts and create SKILL.MD instruction files", "Deploy AI Agents in Shadow Mode and analyze reasoning logs", "Translate human operational logic into agentic workflows"], "keywords": ["AI Agents", "LLM", "Agentic Workflows", "Python", "Machine Learning", "Remote", "Internship"], "experience_years": 0, "seniority_level": "intern"}
+[ 2026-11-06 21:39:14,291 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+[ 2026-11-06 21:39:16,525 ] 214 backend.services.llm_services - INFO - OpenRouter produced diff JSON on attempt 1/3: {"target_skills": [{"skill": "Python", "reason": "Core requirement for the internship and the primary language used in the candidate's existing projects."}, {"skill": "AI Agents", "reason": "The JD focuses on building autonomous agents and agentic workflows; the candidate already has experience with LangGraph."}, {"skill": "LangChain", "reason": "Explicitly listed as a preferred framework in the JD and a core skill on the resume."}, {"skill": "Prompt Engineering", "reason": "Required for drafting system prompts and SKILL.MD files; candidate has experience optimizing LLM prompt formatting."}, {"skill": "REST APIs", "reason": "Required for writing API connectors; candidate has experience with FastAPI and Pydantic."}, {"skill": "JSON parsing", "reason": "Required for handling agent reasoning logs and structured data exchange."}, {"skill": "LLM (Large Language Models)", "reason": "Fundamental requirement for the role; candidate has worked with OpenRouter and RAG pipelines."}, {"skill": "SQL", "reason": "Preferred skill for database interaction; candidate has existing MySQL experience."}, {"skill": "Agentic Workflows", "reason": "Key JD keyword describing the transition from rules-based automation to intelligent agents."}, {"skill": "Git", "reason": "Preferred skill for version control in a collaborative engineering environment."}], "strategy_notes": "Emphasize the transition from RAG to 'Agentic Workflows' by highlighting LangGraph experience. Use keywords like 'Autonomous Agents' and 'Shadow Mode' testing to align with the JD's specific operational goals. Ensure the 'Remote' and 'Inter... [truncated]"}
+[ 2026-11-06 21:39:18,271 ] 1922 httpx2 - INFO - HTTP Request: POST https://openrouter.ai/api/v1/chat/completions "HTTP/1.1 200 OK"
+[ 2026-11-06 21:39:22,835 ] 214 backend.services.llm_services - INFO - OpenRouter produced diff JSON on attempt 1/3: {"changes": [{"path": "summary", "action": "replace", "original": "Aspiring AI Engineer and Generative AI Developer with a Python-focused skill set for building LLM-powered applications and RAG (Retrieval-Augmented Generation) pipelines over vector databases. Comfortable using LangChain and LangGraph to bu... [truncated]", "value": "Aspiring AI Engineer and Generative AI Developer with a Python-focused skill set for building autonomous AI Agents and Agentic Workflows. Experienced in using LangChain and LangGraph to architect multi-step agents, FastAPI for REST APIs, an... [truncated]", "reason": "Reframed summary to use JD-specific terminology like 'Agentic Workflows' and 'REST APIs' while highlighting the remote internship target."}, {"path": "workExperience[0].responsibilities[1]", "action": "replace", "original": "Optimized LLM prompt formatting by restructuring raw-string context into structured MD/XML/ YAML, improving prompt parsing and response consistency.", "value": "Performed Prompt and Context Engineering by restructuring raw-string context into structured SKILL.MD and YAML formats, improving JSON parsing and agent reasoning consistency.", "reason": "Directly aligns with the JD's requirement for 'Prompt and Context Engineering' and the specific mention of 'SKILL.MD' files."}, {"path": "workExperience[0].responsibilities[2]", "action": "replace", "original": "Developed a domain-specific healthcare chatbot with a custom deterministic orchestrator for query routing, including an escalation flow to doctor-consultation booking.", "value": "Developed a domain-specific healthcare AI Agent with a custom deterministic orchestrator for agentic workflows, including Human-In-The-Loop escalation flows for consultation booking.", "reason": "Uses JD keywords 'AI Agent', 'Agentic Workflows', and 'Human-In-The-Loop' to describe existing deterministic logic."}, {"path": "additional[0].technicalSkills", "action": "reorder", "original": null, "value": ["Python", "LangChain", "LangGraph", "FastAPI", "MySQL", "Pydantic", "Vector Databases", "Java"], "reason": "Prioritized Python and LLM frameworks (LangChain/LangGraph) as per the JD requirements."}, {"path": "additional[0].technicalSkills", "action": "add_skill", "original": null, "value": "REST APIs", "reason": "Added as a verified skill target explicitly required by the JD for writing API connectors."}, {"path": "additional[0].technicalSkills", "action": "add_skill", "original": null, "value": "Git", "reason": "Added as a verified skill target listed as a preferred requirement in the JD."}, {"path": "additional[0].technicalSkills", "action": "add_skill", "original": null, "value": "AI Agents", "reason": "Added as a verified skill target to emphasize the core focus of the role."}], "strategy_notes": "The resume was tailored to emphasize 'Agentic Workflows' and 'AI Agents' by reframing the candidate's existing LangGraph and LangChain experience. Prompt engineering bullets were updated to include specific JD terminology like 'SKILL.MD' an... [truncated]"}

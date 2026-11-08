@@ -21,9 +21,14 @@ RESUME_SCHEMA_EXAMPLE = """{
     "email": "john@example.com",
     "phone": "+1-555-0100",
     "location": "San Francisco, CA",
-    "website": "https://johndoe.dev",
-    "linkedin": "linkedin.com/in/johndoe",
-    "github": "github.com/johndoe"
+    "portfolio_url": "https://johndoe.dev",
+    "linkedin_url": "https://linkedin.com/in/johndoe",
+    "github_url": "https://github.com/johndoe",
+    "twitter_url": "https://x.com/johndoe",
+    "other_links": {
+      "Medium": "https://medium.com/@johndoe",
+      "Stack Overflow": "https://stackoverflow.com/users/12345/johndoe"
+    }
   },
   "summary": "Experienced software engineer with 5+ years...",
   "workExperience": [
@@ -67,6 +72,25 @@ RESUME_SCHEMA_EXAMPLE = """{
     "certificationsTraining": ["AWS Solutions Architect"],
     "awards": ["Employee of the Year 2022"]
   },
+  "customSections": {
+    "publications": {
+      "sectionType": "itemList",
+      "items": [
+        {
+          "id": 1,
+          "title": "Paper Title",
+          "subtitle": "Journal Name",
+          "years": "Jun 2023",
+          "description": ["Brief description of the publication"],
+          "descriptionStyles": ["bullet"]
+        }
+      ]
+    },
+    "volunteer_work": {
+      "sectionType": "text",
+      "text": "Description of volunteer activities..."
+    }
+  }
 }"""
 
 IMPROVE_SCHEMA_EXAMPLE = """{
@@ -113,6 +137,25 @@ IMPROVE_SCHEMA_EXAMPLE = """{
     "certificationsTraining": ["AWS Solutions Architect"],
     "awards": ["Employee of the Year 2022"]
   },
+  "customSections": {
+    "publications": {
+      "sectionType": "itemList",
+      "items": [
+        {
+          "id": 1,
+          "title": "Paper Title",
+          "subtitle": "Journal Name",
+          "years": "Jun 2023",
+          "description": ["Brief description of the publication"],
+          "descriptionStyles": ["bullet"]
+        }
+      ]
+    },
+    "volunteer_work": {
+      "sectionType": "text",
+      "text": "Description of volunteer activities..."
+    }
+  }
 }"""
 
 
@@ -130,6 +173,7 @@ Custom section types:
 
 Rules:
 - Use "" for missing text fields, [] for missing arrays, null for optional fields
+- Extract all social media, professional profile, portfolio, and website URLs from the resume into personalInfo. Use github_url, linkedin_url, twitter_url, portfolio_url, and other_links (a platform-name-to-URL object) with the exact field names shown in the schema. Preserve each URL as written; do not invent links.
 - For experience_requirements, education_requirements, and key_responsibilities, always return an array of strings. If no value exists, return [] (never [0], [null], or [""]).
 - Number IDs starting from 1
 - For workExperience, personalProjects, and custom itemList items, include descriptionStyles with one value for each description row. Use "bullet" for normal bullet rows and "plain" for rows that should render without a bullet marker (for example subheadings or standalone labels).
@@ -956,3 +1000,25 @@ Output this exact JSON format, nothing else:
   ],
   "strategy_notes": "brief summary of the tailoring approach"
 }}"""
+
+OUTREACH_MESSAGE_PROMPT = """Generate a cold outreach message for LinkedIn or email about this job opportunity.
+
+IMPORTANT: Write in {output_language}.
+
+Job Description:
+{job_description}
+
+Candidate Resume (JSON):
+{resume_data}
+
+Guidelines:
+- Write a complete, detailed message of about 140-180 words, not a short blurb or a cover letter.
+- Format it as 3 short, readable paragraphs: a natural greeting and a specific reference to the role or work; the candidate's most relevant experience and concrete evidence from the resume; and a friendly, low-pressure request to connect, followed by a brief sign-off.
+- Reference a specific team, product, or technical challenge from the job description. Do not open with "I'm reaching out" or "I saw your posting".
+- Explain why the candidate's experience is relevant instead of listing skills. Include a concrete metric or result only when one is present in the resume.
+- Keep the tone warm and professional, like messaging a former colleague.
+- Do not invent recipient details, achievements, metrics, or experience. Do not include placeholder brackets; if a name is unavailable, use a simple greeting and sign off with the candidate's name only if it is in the resume.
+- Do NOT use phrases like "excited about" or "passionate about".
+- Do NOT use em dash ("—") anywhere in the writing/output, even if it exists, remove it.
+
+Output the complete message as plain text with paragraph breaks. No JSON, headings, or markdown formatting."""

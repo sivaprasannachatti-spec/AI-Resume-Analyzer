@@ -1,11 +1,14 @@
 from typing import Optional, Dict, Any
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, Query
 from pydantic import BaseModel
 
 from backend.controllers.cv_controller import (
     handle_tailor_cv,
     handle_confirm_tailored_resume,
+    handle_generate_outreach_message,
     handle_update_tailored_resume,
+    handle_update_outreach_message,
+    handle_get_outreach_message_history,
     handle_save_cv_pdf,
     get_current_cv
 )
@@ -31,6 +34,15 @@ class ConfirmTailoredResumeRequest(BaseModel):
     template_settings: Optional[Dict[str, Any]] = None
 
 
+class GenerateOutreachMessageRequest(BaseModel):
+    job_description: str
+    language: str = "en"
+
+
+class UpdateOutreachMessageRequest(BaseModel):
+    message: str
+
+
 @router.post("/tailor")
 async def tailor_cv(request: TailorCVRequest):
     """Tailors candidate's CV specifically for the target job description."""
@@ -38,6 +50,39 @@ async def tailor_cv(request: TailorCVRequest):
         resume_id=request.resume_id,
         raw_jd=request.raw_jd,
     )
+
+
+@router.post("/tailored-resume/{tailored_resume_id}/outreach-messages")
+async def generate_outreach_message_endpoint(
+    tailored_resume_id: str,
+    request: GenerateOutreachMessageRequest,
+):
+    """Generate an outreach message for a saved tailored resume and persist it."""
+    return await handle_generate_outreach_message(
+        tailored_resume_id=tailored_resume_id,
+        job_description=request.job_description,
+        language=request.language,
+    )
+
+
+@router.put("/outreach-messages/{outreach_id}")
+async def update_outreach_message_endpoint(
+    outreach_id: str,
+    request: UpdateOutreachMessageRequest,
+):
+    """Persist user edits to an outreach message."""
+    return handle_update_outreach_message(
+        outreach_id=outreach_id,
+        message=request.message,
+    )
+
+
+@router.get("/outreach-messages/history")
+async def get_outreach_message_history_endpoint(
+    user_id: Optional[str] = Query(default=None),
+):
+    """List saved outreach drafts for the given user (or the demo user)."""
+    return handle_get_outreach_message_history(user_id=user_id)
 
 
 @router.put("/tailored-resume")
@@ -68,7 +113,7 @@ async def save_pdf_endpoint(
     file: UploadFile = File(...)
 ):
     """Uploads finalized in-browser generated PDF to Backblaze B2 and links file_url in DB."""
-    return handle_save_cv_pdf(resume_id=resume_id, file=file)
+    return await handle_save_cv_pdf(resume_id=resume_id, file=file)
 
 
 @router.get("/{resume_id}")

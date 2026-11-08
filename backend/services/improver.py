@@ -614,6 +614,10 @@ def _restore_master_invariants(
     result = copy.deepcopy(candidate)
     if isinstance(master.get("personalInfo"), dict):
         result["personalInfo"] = copy.deepcopy(master["personalInfo"])
+    if "customSections" in master:
+        result["customSections"] = copy.deepcopy(master["customSections"])
+    else:
+        result.pop("customSections", None)
 
     protected_fields = {
         "workExperience": ("id", "title", "company", "location", "years"),

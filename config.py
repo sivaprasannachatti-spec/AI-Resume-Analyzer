@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://neondb_owner:npg_bdrUhSniq75c@ep-square-queen-a1a46t2r-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require")
 
 OPENROUTER_API_KEY_1 = os.getenv("OPENROUTER_API_KEY_1")
 OPENROUTER_API_KEY_2 = os.getenv("OPENROUTER_API_KEY_2")

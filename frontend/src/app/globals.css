@@ -208,10 +208,9 @@ textarea:focus-visible {
   }
 
   #resume-document-sheet {
-    position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: auto !important;
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
     height: auto !important;
     max-height: none !important;
     margin: 0 !important;
@@ -220,19 +219,38 @@ textarea:focus-visible {
     border: none !important;
     border-radius: 0 !important;
     overflow: visible !important;
-    page-break-after: avoid !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
+    page-break-after: auto !important;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+
+  main {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  main > section {
+    display: block !important;
   }
 
   .resume-paper {
+    width: var(--page-width) !important;
+    min-height: var(--page-height) !important;
+    height: auto !important;
+    max-height: none !important;
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
+    page-break-after: auto !important;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+
+  .resume-paper h2 {
+    break-after: avoid !important;
     page-break-after: avoid !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
   }
 }

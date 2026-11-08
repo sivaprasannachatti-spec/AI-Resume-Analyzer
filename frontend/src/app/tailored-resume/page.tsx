@@ -7,6 +7,8 @@ import {
   CheckCircle2,
   FileCheck2,
   Loader2,
+  MessageSquareText,
+  Save,
   Sparkles,
   WandSparkles,
 } from "lucide-react";
@@ -15,11 +17,16 @@ import ResumeViewer from "@/components/ResumeViewer";
 import AtsSpeedometer from "@/components/AtsSpeedometer";
 import { apiFetch } from "@/lib/api";
 import { AtsScorePair, ResumeSchema } from "@/types/resume";
-import { TemplateSettings } from "@/components/resume/template-settings";
+import {
+  AccentColor,
+  PageSize,
+  SpacingLevel,
+  TemplateSettings,
+} from "@/components/resume/template-settings";
 
 interface TailoringPreview {
   resume_id: string;
-  tailored_resume_id: string;
+  tailored_resume_id?: string;
   tailored_resume_payload: ResumeSchema;
   original_resume_payload?: ResumeSchema;
   raw_jd: string;
@@ -36,6 +43,59 @@ interface TailoringPreview {
   writing_checks?: string[];
   template?: string;
   templateSettings?: TemplateSettings;
+}
+
+const ACCENT_OPTIONS: { id: AccentColor; label: string; color: string }[] = [
+  { id: "blue", label: "Blue", color: "#1d4ed8" },
+  { id: "green", label: "Green", color: "#15803d" },
+  { id: "orange", label: "Orange", color: "#ea580c" },
+  { id: "red", label: "Red", color: "#dc2626" },
+];
+
+const PAGE_SIZE_OPTIONS: { id: PageSize; label: string; detail: string }[] = [
+  { id: "A4", label: "A4", detail: "210 × 297 mm" },
+  { id: "LETTER", label: "US Letter", detail: "8.5 × 11 in" },
+];
+
+const SPACING_LEVELS: SpacingLevel[] = [1, 2, 3, 4, 5];
+
+function SpacingControl({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: SpacingLevel;
+  onChange: (value: SpacingLevel) => void;
+}) {
+  return (
+    <div>
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="text-xs font-semibold text-[var(--text-body)]">{label}</span>
+        <span className="text-[10px] text-[var(--text-muted)]">
+          {value === 1 ? "Tight" : value === 5 ? "Relaxed" : `Level ${value}`}
+        </span>
+      </div>
+      <div role="group" aria-label={label} className="grid grid-cols-5 gap-1.5">
+        {SPACING_LEVELS.map((level) => (
+          <button
+            key={level}
+            type="button"
+            aria-label={`${label}: ${level}${level === 1 ? ", tightest" : level === 5 ? ", most relaxed" : ""}`}
+            aria-pressed={value === level}
+            onClick={() => onChange(level)}
+            className={`rounded-lg border px-2 py-1.5 text-xs font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary-accent)] ${
+              value === level
+                ? "border-[var(--primary-accent)] bg-[var(--primary-accent)] text-white"
+                : "border-[var(--border-subtle)] bg-[var(--bg-elevated)] text-[var(--text-body)] hover:border-[var(--primary-accent)]"
+            }`}
+          >
+            {level}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function ChangeList({
@@ -77,13 +137,19 @@ export default function TailoredResumePage() {
   const [preview, setPreview] = useState<TailoringPreview | null>(null);
   const [isApplying, setIsApplying] = useState(false);
   const [applied, setApplied] = useState(false);
+  const [outreachId, setOutreachId] = useState<string | null>(null);
+  const [outreachMessage, setOutreachMessage] = useState("");
+  const [isGeneratingOutreach, setIsGeneratingOutreach] = useState(false);
+  const [isSavingOutreach, setIsSavingOutreach] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem("resumatch_tailoring_preview");
       if (stored) {
-        setPreview(JSON.parse(stored) as TailoringPreview);
+        const savedPreview = JSON.parse(stored) as TailoringPreview;
+        setPreview(savedPreview);
+        setApplied(Boolean(savedPreview.tailored_resume_id));
       } else {
         router.replace("/upload");
       }
@@ -110,7 +176,11 @@ export default function TailoredResumePage() {
       });
       setPreview((current) => {
         if (!current) return current;
-        const next = { ...current, ats_scores: result.ats_scores ?? current.ats_scores };
+        const next = {
+          ...current,
+          tailored_resume_id: result.tailored_resume_id,
+          ats_scores: result.ats_scores ?? current.ats_scores,
+        };
         sessionStorage.setItem("resumatch_tailoring_preview", JSON.stringify(next));
         return next;
       });
@@ -119,6 +189,49 @@ export default function TailoredResumePage() {
       setError(reason instanceof Error ? reason.message : "Unable to apply this resume.");
     } finally {
       setIsApplying(false);
+    }
+  };
+
+  const handleGenerateOutreach = async () => {
+    if (!preview?.tailored_resume_id || isGeneratingOutreach) return;
+    setIsGeneratingOutreach(true);
+    setError(null);
+    try {
+      const result = await apiFetch(
+        `/api/cv/tailored-resume/${preview.tailored_resume_id}/outreach-messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            job_description: preview.raw_jd,
+            language: "en",
+          }),
+        },
+      );
+      setOutreachId(result.outreach_id);
+      setOutreachMessage(result.message);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to generate an outreach message.");
+    } finally {
+      setIsGeneratingOutreach(false);
+    }
+  };
+
+  const handleSaveOutreach = async () => {
+    if (!outreachId || isSavingOutreach) return;
+    setIsSavingOutreach(true);
+    setError(null);
+    try {
+      const result = await apiFetch(`/api/cv/outreach-messages/${outreachId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: outreachMessage }),
+      });
+      setOutreachMessage(result.message);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to save the outreach message.");
+    } finally {
+      setIsSavingOutreach(false);
     }
   };
 
@@ -216,6 +329,67 @@ export default function TailoredResumePage() {
           </div>
         )}
 
+        {applied && (
+          <section className="space-y-5 rounded-3xl p-5 glass-panel sm:p-7 print:hidden">
+            <div className="flex items-start gap-3">
+              <MessageSquareText className="mt-0.5 h-5 w-5 shrink-0 text-[var(--primary-accent)]" />
+              <div>
+                <h2 className="text-base font-bold text-[var(--text-heading)]">Cold outreach message</h2>
+                <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">
+                  Generate a detailed draft, then edit it here before saving.
+                </p>
+              </div>
+            </div>
+            {!outreachId ? (
+              <button
+                type="button"
+                onClick={handleGenerateOutreach}
+                disabled={isGeneratingOutreach || !preview.tailored_resume_id}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[var(--primary-accent)] px-5 py-3 text-sm font-bold text-[var(--primary-accent)] transition hover:bg-[var(--primary-accent)] hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isGeneratingOutreach ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                {isGeneratingOutreach ? "Generating..." : "Generate Cold Outreach Message"}
+              </button>
+            ) : (
+              <>
+                <label className="block text-sm font-semibold text-[var(--text-body)]">
+                  Edit your message
+                  <textarea
+                    value={outreachMessage}
+                    onChange={(event) => setOutreachMessage(event.target.value)}
+                    rows={14}
+                    aria-label="Edit your cold outreach message"
+                    spellCheck
+                    className="mt-2 min-h-72 w-full resize-y rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-4 py-4 text-base font-normal leading-7 text-[var(--text-body)]"
+                  />
+                </label>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs text-[var(--text-muted)]">
+                    {outreachMessage.trim() ? outreachMessage.trim().split(/\s+/).length : 0} words
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleSaveOutreach}
+                    disabled={isSavingOutreach || !outreachMessage.trim()}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[var(--primary-gradient)] px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSavingOutreach ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    {isSavingOutreach ? "Saving..." : "Save message"}
+                  </button>
+                </div>
+              </>
+            )}
+          </section>
+        )}
+
         <section className="grid gap-5 lg:grid-cols-[280px_1fr]">
           <aside className="space-y-4 print:hidden">
             {templateSettings && (
@@ -248,23 +422,72 @@ export default function TailoredResumePage() {
                     <option value="modern-deedy">Modern Deedy</option>
                   </select>
                 </label>
-                <label className="block text-xs font-semibold text-[var(--text-body)]">
-                  Accent color
-                  <select
-                    value={templateSettings.accentColor}
-                    onChange={(event) =>
-                      void handleTemplateSettingsChange({ ...templateSettings, accentColor: event.target.value as typeof templateSettings.accentColor })
+                <fieldset className="space-y-2">
+                  <legend className="text-xs font-semibold text-[var(--text-body)]">Accent color</legend>
+                  <div className="grid grid-cols-4 gap-2">
+                    {ACCENT_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        aria-label={`${option.label} accent`}
+                        aria-pressed={templateSettings.accentColor === option.id}
+                        onClick={() =>
+                          void handleTemplateSettingsChange({
+                            ...templateSettings,
+                            accentColor: option.id,
+                          })
+                        }
+                        className={`flex items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-[11px] font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary-accent)] ${
+                          templateSettings.accentColor === option.id
+                            ? "border-[var(--primary-accent)] bg-[var(--bg-elevated)] text-[var(--text-heading)]"
+                            : "border-[var(--border-subtle)] text-[var(--text-body)] hover:border-[var(--primary-accent)]"
+                        }`}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="h-3 w-3 rounded-full ring-1 ring-black/10"
+                          style={{ backgroundColor: option.color }}
+                        />
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+                <div className="space-y-3 rounded-2xl border border-[var(--border-subtle)] p-3">
+                  <p className="text-xs font-semibold text-[var(--text-body)]">Spacing</p>
+                  <SpacingControl
+                    label="Section spacing"
+                    value={templateSettings.spacing.section}
+                    onChange={(section) =>
+                      void handleTemplateSettingsChange({
+                        ...templateSettings,
+                        spacing: { ...templateSettings.spacing, section },
+                      })
                     }
-                    className="mt-1.5 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-body)]"
-                  >
-                    <option value="blue">Blue</option>
-                    <option value="green">Green</option>
-                    <option value="orange">Orange</option>
-                    <option value="red">Red</option>
-                  </select>
-                </label>
+                  />
+                  <SpacingControl
+                    label="Entry spacing"
+                    value={templateSettings.spacing.item}
+                    onChange={(item) =>
+                      void handleTemplateSettingsChange({
+                        ...templateSettings,
+                        spacing: { ...templateSettings.spacing, item },
+                      })
+                    }
+                  />
+                  <SpacingControl
+                    label="Line spacing"
+                    value={templateSettings.spacing.lineHeight}
+                    onChange={(lineHeight) =>
+                      void handleTemplateSettingsChange({
+                        ...templateSettings,
+                        spacing: { ...templateSettings.spacing, lineHeight },
+                      })
+                    }
+                  />
+                </div>
                 <label className="flex items-center justify-between gap-3 text-xs font-semibold text-[var(--text-body)]">
-                  Compact mode
+                  Compact layout
                   <input
                     type="checkbox"
                     checked={templateSettings.compactMode}
@@ -274,19 +497,36 @@ export default function TailoredResumePage() {
                     className="h-4 w-4 accent-indigo-600"
                   />
                 </label>
-                <label className="block text-xs font-semibold text-[var(--text-body)]">
-                  Page size
-                  <select
-                    value={templateSettings.pageSize}
-                    onChange={(event) =>
-                      void handleTemplateSettingsChange({ ...templateSettings, pageSize: event.target.value as typeof templateSettings.pageSize })
-                    }
-                    className="mt-1.5 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-3 py-2 text-xs text-[var(--text-body)]"
-                  >
-                    <option value="A4">A4</option>
-                    <option value="LETTER">US Letter</option>
-                  </select>
-                </label>
+                <fieldset className="space-y-2">
+                  <legend className="text-xs font-semibold text-[var(--text-body)]">Page size</legend>
+                  <div className="grid grid-cols-2 gap-2">
+                    {PAGE_SIZE_OPTIONS.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        aria-pressed={templateSettings.pageSize === option.id}
+                        onClick={() =>
+                          void handleTemplateSettingsChange({
+                            ...templateSettings,
+                            pageSize: option.id,
+                          })
+                        }
+                        className={`rounded-xl border px-2.5 py-2 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary-accent)] ${
+                          templateSettings.pageSize === option.id
+                            ? "border-[var(--primary-accent)] bg-[var(--primary-accent)] text-white"
+                            : "border-[var(--border-subtle)] bg-[var(--bg-elevated)] text-[var(--text-body)] hover:border-[var(--primary-accent)]"
+                        }`}
+                      >
+                        <span className="block text-xs font-bold">{option.label}</span>
+                        <span className={`mt-0.5 block text-[10px] ${
+                          templateSettings.pageSize === option.id ? "text-white/80" : "text-[var(--text-muted)]"
+                        }`}>
+                          {option.detail}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
               </div>
             )}
             <div className="space-y-4 rounded-3xl p-4 glass-panel sm:p-6">

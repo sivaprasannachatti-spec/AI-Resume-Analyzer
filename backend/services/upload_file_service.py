@@ -18,6 +18,29 @@ from config import KEY_ID, APPLICATION_KEY, ENDPOINT_URL, BUCKET_NAME
 logger = logging.getLogger(__name__)
 
 
+def _describe_file_object(file_obj: BinaryIO) -> str:
+    """Return a compact size/position summary for diagnostic logs."""
+    try:
+        size = getattr(file_obj, "getbuffer", None)
+        if callable(size):
+            buffer = size()
+            length = getattr(buffer, "nbytes", None)
+            if length is not None:
+                return f"size_bytes={length}, current_pos={getattr(file_obj, 'tell', lambda: 'unknown')()}"
+        if hasattr(file_obj, "seek") and hasattr(file_obj, "tell"):
+            current_pos = file_obj.tell()
+            try:
+                file_obj.seek(0, 2)
+                end_pos = file_obj.tell()
+                file_obj.seek(current_pos)
+                return f"size_bytes={end_pos}, current_pos={current_pos}"
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return "size_unknown"
+
+
 def _storage_endpoint_host() -> str:
     if not ENDPOINT_URL:
         return "not configured"
@@ -40,6 +63,13 @@ def create_client():
             raise ValueError("BUCKET_NAME is not configured")
         if not KEY_ID or not APPLICATION_KEY:
             raise ValueError("Backblaze credentials are not configured")
+
+        logger.info(
+            "Initializing S3-compatible storage client (endpoint=%s, bucket=%s, has_credentials=%s)",
+            _storage_endpoint_host(),
+            BUCKET_NAME,
+            bool(KEY_ID and APPLICATION_KEY),
+        )
 
         client = boto3.client(
             service_name="s3",
@@ -68,23 +98,34 @@ def create_client():
 def sync_file_upload(file_obj: BinaryIO, file_name: str, content_type: str = "application/pdf"):
     started_at = time.perf_counter()
     logger.info(
-        "Starting object storage upload (endpoint=%s, bucket=%s, content_type=%s)",
+        "Starting object storage upload (endpoint=%s, bucket=%s, file_name=%s, content_type=%s, file_state=%s)",
         _storage_endpoint_host(),
         BUCKET_NAME,
+        file_name,
         content_type,
+        _describe_file_object(file_obj),
     )
     try:
         client = create_client()
+        logger.info(
+            "Uploading object to Backblaze (bucket=%s, key=%s, file_state=%s)",
+            BUCKET_NAME,
+            file_name,
+            _describe_file_object(file_obj),
+        )
         client.upload_fileobj(
             Fileobj=file_obj,
             Bucket=BUCKET_NAME,
             Key=file_name,
             ExtraArgs={"ContentType": content_type}
         )
+        elapsed = time.perf_counter() - started_at
         logger.info(
-            "Object storage upload completed (bucket=%s, duration_seconds=%.2f)",
+            "Object storage upload completed (bucket=%s, key=%s, duration_seconds=%.2f, file_state=%s)",
             BUCKET_NAME,
-            time.perf_counter() - started_at,
+            file_name,
+            elapsed,
+            _describe_file_object(file_obj),
         )
         return f"{ENDPOINT_URL}/{BUCKET_NAME}/{file_name}"
     except ClientError as e:
@@ -124,7 +165,13 @@ def sync_file_upload(file_obj: BinaryIO, file_name: str, content_type: str = "ap
 def upload_file(file_objs: List[BinaryIO], user_ids: List[str], file_name: List[str], content_type: str = "application/pdf"):
     try:
         num_workers = max(1, min(len(file_objs), 10))
-        logger.info("Uploading %d file(s) with %d worker(s)", len(file_objs), num_workers)
+        logger.info(
+            "Batch upload started (files=%d, workers=%d, bucket=%s, endpoint=%s)",
+            len(file_objs),
+            num_workers,
+            BUCKET_NAME,
+            _storage_endpoint_host(),
+        )
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
             content_types = [content_type] * len(file_objs)
             urls = list(executor.map(sync_file_upload, file_objs, file_name, content_types))
